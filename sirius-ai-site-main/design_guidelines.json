@@ -1,0 +1,82 @@
+{
+  "theme": "Dark",
+  "archetype": "Archetype 5: Jewel & Luxury mixed with Retro-Futurism/Terminal Tech",
+  "design_vision": {
+    "emotional_tone": "Cinematic, mysterious, data-heavy, immersive.",
+    "visual_mood": "Deep space void with glowing high-contrast data overlays."
+  },
+  "typography": {
+    "heading_font": "Chivo",
+    "body_font": "IBM Plex Sans",
+    "mono_font": "JetBrains Mono",
+    "hierarchy_rules": "Use tracking-tight for headings, tracking-[0.2em] uppercase for small labels. Keep headings expressive and data monospaced."
+  },
+  "colors": {
+    "background_base": "#05070A",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#A0ABC0",
+    "accent_primary": "#E8FF00",
+    "accent_secondary": "#00F0FF",
+    "border_subtle": "rgba(255, 255, 255, 0.1)",
+    "surface_glass": "rgba(10, 15, 25, 0.65)",
+    "error_alert": "#FF3B30"
+  },
+  "layout_spacing": {
+    "spacing_scale": "p-2, p-4, p-6, p-8",
+    "strategy": "The entire app is a full-screen immersive canvas. The 3D globe is centered and takes up the background. UI elements (AI chat, lists, video bar) are absolutely positioned floating panels overlaying the canvas."
+  },
+  "surfaces_and_micro_themes": {
+    "floating_panels": "Crystal Glassmorphism: backdrop-blur-2xl bg-black/60 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]. Do NOT use pure flat black. Always add a 1px border for crisp edges."
+  },
+  "components": {
+    "globe_3d": "Use react-globe.gl. Set globe background to transparent. Configure globeImageUrl with a dark map style or solid dark colors. Show country borders subtly. Implement interactive dots: glowing yellow (#E8FF00) for UAP sightings, glowing cyan (#00F0FF) for satellites.",
+    "background_stars": "Create a pure CSS or lightweight Canvas starfield (black background with randomly scattered white dots of varying opacities) behind the 3D globe.",
+    "ai_chat_interface": "A sleek floating panel or command-palette style input overlaid on the screen. Use mono font for AI typing effects. Glowing active states.",
+    "buttons": "Tech style: 1px solid border-white/20, hover:border-white/60 with subtle text glow. No heavy filled backgrounds unless it is the primary CTA.",
+    "video_bar": "Fixed at bottom. Horizontal scroll container with hidden scrollbar. Video thumbnails should have hover scale-up effects.",
+    "lists": "Dense data lists for UAP/Satellites inside glass panels. Use monospace fonts for coordinates, altitudes, or timestamps."
+  },
+  "motion": {
+    "interactions": "Hover states must brighten text and borders. The globe must auto-rotate slowly but stop immediately upon user click/interaction.",
+    "entrance": "Staggered fade-up and slight translation for lists."
+  },
+  "media": {
+    "video_thumbnails": [
+      {
+        "url": "https://images.unsplash.com/photo-1700781892121-6df3b83a8f31?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDN8MHwxfHNlYXJjaHw0fHxteXN0ZXJpb3VzJTIwbmlnaHQlMjBza3l8ZW58MHx8fHwxNzc2NTEwMjczfDA&ixlib=rb-4.1.0&q=85",
+        "description": "moon seen through trees at night",
+        "category": "video_thumbnail"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1723810277428-4ac811e1e6d2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDN8MHwxfHNlYXJjaHwyfHxteXN0ZXJpb3VzJTIwbmlnaHQlMjBza3l8ZW58MHx8fHwxNzc2NTEwMjczfDA&ixlib=rb-4.1.0&q=85",
+        "description": "white bird flying through dark sky",
+        "category": "video_thumbnail"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1553345682-33b4e98a2a0b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDN8MHwxfHNlYXJjaHwxfHxteXN0ZXJpb3VzJTIwbmlnaHQlMjBza3l8ZW58MHx8fHwxNzc2NTEwMjczfDA&ixlib=rb-4.1.0&q=85",
+        "description": "close-up photography of moon",
+        "category": "video_thumbnail"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1606858425472-c4f30b2329b2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDN8MHwxfHNlYXJjaHwzfHxteXN0ZXJpb3VzJTIwbmlnaHQlMjBza3l8ZW58MHx8fHwxNzc2NTEwMjczfDA&ixlib=rb-4.1.0&q=85",
+        "description": "full moon in dark night sky",
+        "category": "video_thumbnail"
+      }
+    ]
+  },
+  "accessibility": {
+    "contrast": "Ensure white text over glassmorphism meets APCA contrast standards. Use text-shadow for added legibility over complex globe areas.",
+    "testing": "MUST add data-testid attributes to all buttons, list items, AI chat inputs, and video thumbnails."
+  },
+  "instructions_to_main_agent": [
+    "INSTALL react-globe.gl and three.js for the 3D globe component.",
+    "INSTALL lucide-react for all iconography (satellites, ufos, etc).",
+    "FETCH and apply Google Fonts: Chivo, IBM Plex Sans, and JetBrains Mono.",
+    "BUILD a full-screen layout. The base layer is a CSS starfield (black bg, white dots). The middle layer is the react-globe.gl component. The top layer consists of absolute-positioned floating glassmorphism panels.",
+    "IMPLEMENT the AI Chat Agent either as a floating side panel or a bottom-left command window.",
+    "CONFIGURE globe markers: UAP reports should cast a fluorescent yellow glow (#E8FF00). Satellites should be cyan (#00F0FF).",
+    "ENSURE all floating lists (UAP, Anomalous, Satellites) use the Crystal Glassmorphism theme (backdrop-blur-2xl, bg-black/60, border border-white/10).",
+    "The horizontal video bar should be fixed at the bottom with overflow-x-auto, styled elegantly so it doesn't block the globe.",
+    "Remember to include data-testid on all interactive elements as per the testing rules."
+  ]
+}
