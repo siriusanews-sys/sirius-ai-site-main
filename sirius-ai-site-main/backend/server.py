@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import json
 import re
+import httpx
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -216,11 +217,11 @@ def get_chat_instance(session_id: str) -> LlmChat:
         chat = LlmChat(
             api_key=api_key,
             session_id=session_id,
-            system_message="""You are SIRIUS AI, a dynamic UAP Specialist focused on unexplained aerospace and space-domain phenomena.
+            system_message="""You are SIRIUS AI, a lead investigator and world-class expert in UFOs, UAPs, and paranormal mysteries.
             
 Your knowledge includes:
 - Historical UFO/UAP sightings and incidents
-- Government investigations (Project Blue Book, AATIP, etc.)
+- Government investigations and declassified programs (Project Blue Book, AATIP, UAPTF, etc.)
 - Scientific analysis of unexplained phenomena
 - Satellite information and space objects
 - Technical UAP descriptors (including trans-medium travel)
@@ -241,6 +242,9 @@ Behavior rules:
 - Use professional UAP terminology where relevant, including "trans-medium travel".
 - When a user asks about a specific location or event, provide informative responses about known incidents.
 - Act as a bridge between official declassified data and global witness reports, clearly distinguishing confirmed facts vs claims.
+- Use real-time web-search context provided in the user message to incorporate the latest global updates.
+- For user-reported sightings, compare the report against historical patterns and latest global data before drawing conclusions.
+- ALWAYS provide a credibility probability score in every response using this exact format: "Credibility Probability Score: XX%".
 
 IMPORTANT: When you mention a specific incident or location, you MUST include location data in this exact JSON format at the END of your response:
 ```json
@@ -272,6 +276,150 @@ def clean_response(response: str) -> str:
     json_pattern = r'```json\s*\{[^`]+\}\s*```'
     return re.sub(json_pattern, '', response).strip()
 
+def estimate_credibility_score(user_message: str, historical_hits: List[dict], realtime_hits: List[dict]) -> int:
+    """Heuristic fallback credibility score when the model omits one."""
+    score = 35
+    message = user_message.lower()
+
+    if historical_hits:
+        score += min(30, len(historical_hits) * 8)
+    if realtime_hits:
+        score += min(20, len(realtime_hits) * 5)
+    if re.search(r"\b(video|radar|flir|infrared|pilot|atc|satellite|sensor)\b", message):
+        score += 10
+    if re.search(r"\b(single witness|dream|felt|intuition|channeling)\b", message):
+        score -= 10
+
+    return max(5, min(95, score))
+
+def ensure_probability_score(response: str, fallback_score: int) -> str:
+    """Ensure every response contains a credibility probability score."""
+    if re.search(r"credibility probability score\s*:\s*\d{1,3}\s*%", response, re.IGNORECASE):
+        return response
+    return f"{response.strip()}\n\nCredibility Probability Score: {fallback_score}%"
+
+def build_historical_pattern_context(user_message: str, sightings: List[dict]) -> List[dict]:
+    """Find sightings that match location/event keywords from user query."""
+    tokens = [t for t in re.findall(r"[a-zA-Z0-9\-]+", user_message.lower()) if len(t) > 3]
+    matches = []
+
+    for sighting in sightings:
+        searchable = f"{sighting.get('title', '')} {sighting.get('description', '')} {sighting.get('location', '')}".lower()
+        score = sum(1 for token in tokens if token in searchable)
+        if score > 0:
+            matches.append({
+                "title": sighting.get("title"),
+                "location": sighting.get("location"),
+                "date": sighting.get("date"),
+                "type": sighting.get("type"),
+                "score": score
+            })
+
+    matches.sort(key=lambda x: x["score"], reverse=True)
+    return matches[:5]
+
+async def search_tavily(query: str, api_key: str) -> List[dict]:
+    payload = {
+        "query": query,
+        "search_depth": "advanced",
+        "max_results": 5,
+        "topic": "news"
+    }
+    async with httpx.AsyncClient(timeout=12.0) as client:
+        response = await client.post(
+            "https://api.tavily.com/search",
+            headers={"Content-Type": "application/json"},
+            json={**payload, "api_key": api_key}
+        )
+        response.raise_for_status()
+        data = response.json()
+    return data.get("results", [])
+
+async def search_serper(query: str, api_key: str) -> List[dict]:
+    payload = {
+        "q": query,
+        "num": 5
+    }
+    async with httpx.AsyncClient(timeout=12.0) as client:
+        response = await client.post(
+            "https://google.serper.dev/news",
+            headers={
+                "X-API-KEY": api_key,
+                "Content-Type": "application/json"
+            },
+            json=payload
+        )
+        response.raise_for_status()
+        data = response.json()
+    return data.get("news", [])
+
+async def fetch_realtime_updates(query: str) -> List[dict]:
+    """Fetch latest web updates via Tavily or Serper."""
+    tavily_key = "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"
+    serper_key = os.environ.get("SERPER_API_KEY")
+
+    try:
+        if tavily_key:
+            results = await search_tavily(query, tavily_key)
+            return [
+                {
+                    "title": item.get("title", ""),
+                    "url": item.get("url", ""),
+                    "source": item.get("source", "Tavily"),
+                    "date": item.get("published_date", ""),
+                    "snippet": item.get("content", "")
+                }
+                for item in results
+            ]
+        if serper_key:
+            results = await search_serper(query, serper_key)
+            return [
+                {
+                    "title": item.get("title", ""),
+                    "url": item.get("link", ""),
+                    "source": item.get("source", "Serper"),
+                    "date": item.get("date", ""),
+                    "snippet": item.get("snippet", "")
+                }
+                for item in results
+            ]
+    except Exception as e:
+        logger.warning(f"Real-time web search failed: {e}")
+
+    return []
+
+def build_investigation_context(user_message: str, historical_hits: List[dict], realtime_hits: List[dict]) -> str:
+    """Create context block for lead-investigator style analysis."""
+    historical_lines = []
+    for hit in historical_hits[:3]:
+        historical_lines.append(
+            f"- {hit['title']} ({hit['date']}, {hit['location']}, type={hit['type']}, similarity={hit['score']})"
+        )
+
+    realtime_lines = []
+    for item in realtime_hits[:3]:
+        realtime_lines.append(
+            f"- {item.get('title', 'Untitled')} | {item.get('source', 'Unknown')} | {item.get('date', 'Unknown date')} | {item.get('url', '')}"
+        )
+
+    if not historical_lines:
+        historical_lines = ["- No close historical pattern match found in current local database."]
+    if not realtime_lines:
+        realtime_lines = ["- Real-time search unavailable or no relevant fresh updates found."]
+
+    return (
+        "INVESTIGATION BRIEF:\n"
+        f"User report/query: {user_message}\n"
+        "Historical pattern matches:\n"
+        + "\n".join(historical_lines)
+        + "\nLatest global updates (real-time web search):\n"
+        + "\n".join(realtime_lines)
+        + "\nInstructions:\n"
+        "- Compare the user case against historical patterns and latest updates.\n"
+        "- Distinguish verified facts from claims.\n"
+        "- Include a clear credibility assessment with 'Credibility Probability Score: XX%'."
+    )
+
 # ==================== Routes ====================
 
 @api_router.get("/")
@@ -297,13 +445,24 @@ async def chat(request: ChatRequest):
             if msg["role"] == "user":
                 await chat_instance.send_message(UserMessage(text=msg["content"]))
         
-        # Send new message
-        user_message = UserMessage(text=request.message)
+        # Build dynamic investigation context (historical + real-time web)
+        all_sightings = await db.sightings.find({}, {"_id": 0}).to_list(2000)
+        if not all_sightings:
+            all_sightings = SEED_SIGHTINGS
+
+        historical_hits = build_historical_pattern_context(request.message, all_sightings)
+        realtime_hits = await fetch_realtime_updates(f"UFO UAP paranormal {request.message}")
+        context_brief = build_investigation_context(request.message, historical_hits, realtime_hits)
+
+        # Send new message with enriched context
+        user_message = UserMessage(text=f"{context_brief}\n\nUSER MESSAGE:\n{request.message}")
         response = await chat_instance.send_message(user_message)
         
         # Extract location if present
         location_data = extract_location_from_response(response)
         clean_text = clean_response(response)
+        fallback_score = estimate_credibility_score(request.message, historical_hits, realtime_hits)
+        clean_text = ensure_probability_score(clean_text, fallback_score)
         
         # Save user message
         user_msg = ChatMessage(
