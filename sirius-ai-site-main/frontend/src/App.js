@@ -610,7 +610,7 @@ function App() {
         body: JSON.stringify({
           contents: [{ 
             parts: [{ 
-              text: `You are Sirius AI, UFO Expert. Answer this question: ${userMessage}` 
+              text: `You are Sirius AI, a global UFO/UAP intelligence expert with access to all historical and recent information available in your training data (Gemini). You are NOT limited to only 13 local sightings. Instead, you should act as a comprehensive UFO/UAP intelligence expert with access to all historical and recent information available in your training data. When a user asks about a case not in the local database, you should provide detailed information from your own global knowledge base while maintaining the "Sirius AI" persona and 5 Observables analysis. Answer this question: ${userMessage}` 
             }] 
           }],
           generationConfig: {
