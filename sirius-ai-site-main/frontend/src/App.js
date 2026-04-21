@@ -144,102 +144,6 @@ const simulateSatellitePositions = (sats) => {
   });
 };
 
-// Local AI response system - smart keyword matching
-const generateLocalAIResponse = (message, sightings) => {
-  const msg = message.toLowerCase();
-  const fiveObservables = [
-    "Sudden acceleration",
-    "Hypersonic velocity without signatures",
-    "Low observability",
-    "Trans-medium travel",
-    "Positive lift without visible propulsion"
-  ];
-  const atalantiSighting = sightings.find(
-    (s) => s.title.toLowerCase().includes("atalanti") || s.location.toLowerCase().includes("megaplatanos")
-  );
-  const isUfoSpaceQuery = /(ufo|uap|aatip|alien|extraterrestrial|anomaly|sighting|encounter|craft|orb|tic tac|roswell|nimitz|aerospace|satellite|space|orbit|asteroid|neo|nasa|atmosphere|aviation|trans-medium)/.test(msg);
-  const isGreekQuery = /(greece|greek|atalanti|megaplatanos)/.test(msg);
-  
-  // Check for greetings
-  if (/^(hi|hello|hey|greetings)/.test(msg)) {
-    return {
-      response: "Hello! I'm SIRIUS AI, your UAP Specialist. I focus on UFO/UAP incidents and space-domain anomalies, including trans-medium travel reports. If you're asking about Greece, start with the Atalanti UFO Incident (1990).",
-      location: null
-    };
-  }
-
-  if (!isUfoSpaceQuery) {
-    return {
-      response: "I specialize exclusively in UFO/UAP and space-domain analysis, so I can’t answer non-UFO/space topics. If useful, I can help with case comparisons, trans-medium travel indicators, or incident timelines.",
-      location: null
-    };
-  }
-
-  if (isGreekQuery && atalantiSighting) {
-    return {
-      response: `For Greece, the highest-priority reference case is the **${atalantiSighting.title}** on ${atalantiSighting.date} in ${atalantiSighting.location}. ${atalantiSighting.description} This case is often discussed for UAP behavior profiles, including possible trans-medium travel characteristics.`,
-      location: {
-        location: atalantiSighting.location,
-        latitude: atalantiSighting.latitude,
-        longitude: atalantiSighting.longitude,
-        event_title: atalantiSighting.title,
-        event_type: atalantiSighting.type
-      }
-    };
-  }
-  
-  // Search through sightings by keywords
-  const keywords = msg.split(/\s+/).filter(w => w.length > 3);
-  let bestMatch = null;
-  let bestScore = 0;
-  
-  for (const sighting of sightings) {
-    const searchText = `${sighting.title} ${sighting.description} ${sighting.location}`.toLowerCase();
-    let score = 0;
-    for (const kw of keywords) {
-      if (searchText.includes(kw)) score += 1;
-      if (sighting.title.toLowerCase().includes(kw)) score += 2;
-      if (sighting.location.toLowerCase().includes(kw)) score += 3;
-    }
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = sighting;
-    }
-  }
-  
-  if (bestMatch && bestScore > 0) {
-    return {
-      response: `I found a match for your query. **${bestMatch.title}** occurred on ${bestMatch.date} in ${bestMatch.location}. ${bestMatch.description} Reported by ${bestMatch.reported_by}. I can also evaluate this case using the 5 Observables framework: ${fiveObservables.join("; ")}.`,
-      location: {
-        location: bestMatch.location,
-        latitude: bestMatch.latitude,
-        longitude: bestMatch.longitude,
-        event_title: bestMatch.title,
-        event_type: bestMatch.type
-      }
-    };
-  }
-  
-  // Default responses
-  if (/(ufo|uap|alien|extraterrestrial)/.test(msg)) {
-    return {
-      response: `I have records of ${sightings.length} documented sightings in the local database, but those are examples rather than limits. I can analyze any global UAP case you mention using the 5 Observables: ${fiveObservables.join("; ")}. I act as a bridge between declassified official data and global witness reporting.`,
-      location: null
-    };
-  }
-  
-  if (/(report|saw|sighting|witness)/.test(msg)) {
-    return {
-      response: "To report your own sighting, click the 'Report' button at the top of this chat panel. Fill in the details including location coordinates, and your sighting will appear on the globe with a yellow glow marker.",
-      location: null
-    };
-  }
-  
-  return {
-    response: `I don't have that exact case in the local list, but I can still analyze it as a dynamic UAP case file using the 5 Observables: ${fiveObservables.join("; ")}. Share event details (time, location, motion profile, sensor type), and I will provide a structured assessment linking declassified references with witness reports.`,
-    location: null
-  };
-};
 
 // SIRIUS AI placeholder image for news modal when article image is missing
 const NEWS_PLACEHOLDER = "https://unsplash.com";
@@ -591,7 +495,7 @@ function App() {
     }
   }, [highlightedLocation]);
 
-  // Handle chat submission - ONLY uses Gemini API, NO local fallback
+  // Handle chat submission - Gemini API ONLY
   const handleSendMessage = async () => {
     if (!chatInput.trim() || isLoading) return;
 
@@ -620,13 +524,8 @@ function App() {
       });
 
       const data = await response.json();
-
-      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-        const aiText = data.candidates[0].content.parts[0].text;
-        setChatMessages(prev => [...prev, { role: "assistant", content: aiText }]);
-      } else {
-        throw new Error("Invalid response from Gemini API");
-      }
+      const aiText = data.candidates[0].content.parts[0].text;
+      setChatMessages(prev => [...prev, { role: "assistant", content: aiText }]);
     } catch (error) {
       console.error("AI Error:", error);
       setChatMessages(prev => [...prev, { role: "assistant", content: "Signal lost... Please check your connection." }]);
