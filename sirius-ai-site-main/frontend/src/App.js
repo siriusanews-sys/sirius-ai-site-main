@@ -496,7 +496,7 @@ function App() {
   }, [highlightedLocation]);
 
   // Handle chat submission - Gemini API ONLY - Clean version
-  const handleSendMessage = async () => {
+  const handleSiriusChat = async () => {
     if (!chatInput.trim() || isLoading) return;
 
     const userMessage = chatInput.trim();
@@ -931,12 +931,12 @@ function App() {
                   placeholder="Ask about UFO events..."
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSiriusChat()}
                   disabled={isLoading}
                 />
                 <Button 
                   data-testid="send-message-btn"
-                  onClick={handleSendMessage}
+                  onClick={handleSiriusChat}
                   disabled={isLoading || !chatInput.trim()}
                   className="bg-cyan-500 hover:bg-cyan-400 text-black"
                 >
