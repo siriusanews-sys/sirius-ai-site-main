@@ -495,7 +495,7 @@ function App() {
     }
   }, [highlightedLocation]);
 
-  // Handle chat submission - Gemini API ONLY
+  // Handle chat submission - Gemini API ONLY - Clean version
   const handleSendMessage = async () => {
     if (!chatInput.trim() || isLoading) return;
 
