@@ -1,4 +1,4 @@
-const YOUTUBE_API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
+const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
 
 export const fetchUFOVideos = async (maxResults = 12) => {
   try {

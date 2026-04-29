@@ -33,7 +33,7 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { fetchUFOVideos } from "./services/youtubeService";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 // Hardcoded sightings data
@@ -505,7 +505,7 @@ function App() {
     setIsLoading(true);
 
     try {
-      const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       const url = `https://googleapis.com/generativeai/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
       
       const response = await fetch(url, {
