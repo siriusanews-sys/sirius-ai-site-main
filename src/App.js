@@ -513,7 +513,9 @@ function App() {
         })
       });
 
-      const data = await response.json();
+      // Read response body only once to prevent stream errors
+      const responseText = await response.text();
+      const data = JSON.parse(responseText);
       
       if (data.response) {
         setChatMessages(prev => [...prev, { role: "assistant", content: data.response }]);
