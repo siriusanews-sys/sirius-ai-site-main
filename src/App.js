@@ -522,7 +522,26 @@ function App() {
       }
     } catch (error) {
       console.error("AI Error:", error);
-      setChatMessages(prev => [...prev, { role: "assistant", content: "Signal lost... Please check your connection." }]);
+      
+      // Display actual error message for debugging
+      let errorMessage = "Signal lost... Please check your connection.";
+      
+      if (error.message) {
+        // Check for specific error types
+        if (error.message.includes('401') || error.message.includes('unauthorized')) {
+          errorMessage = "🔑 Authentication Error: API key issue. Check Vercel environment variables.";
+        } else if (error.message.includes('429') || error.message.includes('quota')) {
+          errorMessage = "⚠️ Quota Exceeded: API limit reached. Please try again later.";
+        } else if (error.message.includes('500') || error.message.includes('server')) {
+          errorMessage = "🔥 Server Error: API server issue. Please try again later.";
+        } else if (error.message.includes('not configured')) {
+          errorMessage = "⚙️ Configuration Error: Environment variables not set properly.";
+        } else {
+          errorMessage = `🚨 API Error: ${error.message}`;
+        }
+      }
+      
+      setChatMessages(prev => [...prev, { role: "assistant", content: errorMessage }]);
     } finally {
       setIsLoading(false);
     }
