@@ -2,15 +2,11 @@ export const fetchUFOVideos = async (maxResults = 12) => {
   try {
     const response = await fetch(`/api/youtube?maxResults=${maxResults}`);
     
-    // Read response body only once to prevent stream errors
-    const responseText = await response.text();
-    
     if (!response.ok) {
-      console.error('YouTube API Error Response:', responseText);
-      throw new Error(`HTTP error! status: ${response.status}, body: ${responseText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const videos = JSON.parse(responseText);
+    const videos = await response.json();
     return videos;
   } catch (error) {
     console.error('Error fetching YouTube videos:', error);
@@ -22,15 +18,11 @@ export const getVideoDetails = async (videoId) => {
   try {
     const response = await fetch(`/api/youtube/details?videoId=${videoId}`);
     
-    // Read response body only once to prevent stream errors
-    const responseText = await response.text();
-    
     if (!response.ok) {
-      console.error('YouTube Details API Error Response:', responseText);
-      throw new Error(`HTTP error! status: ${response.status}, body: ${responseText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const data = JSON.parse(responseText);
+    const data = await response.json();
 
     if (data.error) {
       throw new Error(data.error);

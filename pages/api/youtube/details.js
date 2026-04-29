@@ -28,15 +28,11 @@ export default async function handler(req, res) {
     
     const response = await fetch(url);
     
-    // Read response body only once to prevent stream errors
-    const responseText = await response.text();
-    
     if (!response.ok) {
-      console.error('YouTube Details API Error Response:', responseText);
-      throw new Error(`HTTP error! status: ${response.status}, body: ${responseText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const data = JSON.parse(responseText);
+    const data = await response.json();
 
     if (data.items.length === 0) {
       return res.status(404).json({ error: 'Video not found' });

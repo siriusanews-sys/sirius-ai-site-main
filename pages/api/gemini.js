@@ -45,9 +45,7 @@ export default async function handler(req, res) {
     console.log('Response status:', response.status);
     console.log('Response headers:', Object.fromEntries(response.headers.entries()));
     
-    // Read response body only once to prevent stream errors
-    const responseText = await response.text();
-    const data = JSON.parse(responseText);
+    const data = await response.json();
     console.log('Response data:', data);
 
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
