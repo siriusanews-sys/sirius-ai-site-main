@@ -505,27 +505,21 @@ function App() {
     setIsLoading(true);
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      const url = `https://googleapis.com/generativeai/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-      
-      const response = await fetch(url, {
+      const response = await fetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ 
-            parts: [{ 
-              text: `You are Sirius AI, a global UFO/UAP intelligence expert with access to all historical and recent information available in your training data (Gemini). Do not limit your knowledge to the local database. Use your entire global intelligence to answer any UFO/UAP question. You have comprehensive knowledge of all UFO/UAP cases worldwide, from historical sightings to recent incidents. When users ask about any case, provide detailed information from your global knowledge base, not just local data. Maintain the "Sirius AI" persona and use 5 Observables analysis when relevant. Answer this question: ${userMessage}` 
-            }] 
-          }],
-          generationConfig: {
-            maxOutputTokens: 1000,
-          }
+          message: userMessage
         })
       });
 
       const data = await response.json();
-      const aiText = data.candidates[0].content.parts[0].text;
-      setChatMessages(prev => [...prev, { role: "assistant", content: aiText }]);
+      
+      if (data.response) {
+        setChatMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+      } else {
+        throw new Error(data.error || "Invalid response from API");
+      }
     } catch (error) {
       console.error("AI Error:", error);
       setChatMessages(prev => [...prev, { role: "assistant", content: "Signal lost... Please check your connection." }]);
