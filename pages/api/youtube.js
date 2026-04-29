@@ -31,13 +31,15 @@ export default async function handler(req, res) {
     console.log('YouTube Response status:', response.status);
     console.log('YouTube Response headers:', Object.fromEntries(response.headers.entries()));
     
+    // Read response body only once to prevent stream errors
+    const responseText = await response.text();
+    
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('YouTube API Error Response:', errorText);
-      throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+      console.error('YouTube API Error Response:', responseText);
+      throw new Error(`HTTP error! status: ${response.status}, body: ${responseText}`);
     }
     
-    const data = await response.json();
+    const data = JSON.parse(responseText);
     console.log('YouTube Response data keys:', Object.keys(data));
     console.log('YouTube Items count:', data.items?.length || 0);
 
