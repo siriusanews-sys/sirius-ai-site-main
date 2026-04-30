@@ -33,8 +33,8 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { fetchUFOVideos } from "./services/youtubeService";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// Using Vercel serverless functions at /api/* - no external backend needed
+const API = '/api';
 
 // Hardcoded sightings data
 const STATIC_SIGHTINGS = [
@@ -302,27 +302,8 @@ function App() {
       console.error("LocalStorage load error:", e);
     }
 
-    // Try to fetch live data from backend, fall back to static data
-    const fetchData = async () => {
-      try {
-        const [sightingsRes, satellitesRes] = await Promise.all([
-          axios.get(`${API}/sightings`, { timeout: 3000 }),
-          axios.get(`${API}/satellites`, { timeout: 3000 })
-        ]);
-        const backendSightings = sightingsRes.data.sightings || [];
-        if (backendSightings.length > 0) {
-          const userReported = backendSightings.filter(s => s.is_user_reported);
-          const localSaved = JSON.parse(localStorage.getItem('user_sightings') || '[]');
-          setSightings([...STATIC_SIGHTINGS, ...userReported, ...localSaved]);
-        }
-        if (satellitesRes.data.satellites && satellitesRes.data.satellites.length > 0) {
-          setSatellites(satellitesRes.data.satellites);
-        }
-      } catch (e) {
-        console.log("Backend not available, using static data");
-      }
-    };
-    fetchData();
+    // Using static data - no external backend needed for Vercel deployment
+    // User-reported sightings from localStorage are already loaded above
 
     // Update satellite positions every 5 seconds using local simulation
     const interval = setInterval(() => {
@@ -546,14 +527,7 @@ function App() {
       is_user_reported: true
     };
 
-    // Try to save to backend, but always save locally
-    try {
-      await axios.post(`${API}/sightings`, newSighting, { timeout: 3000 });
-    } catch (e) {
-      console.log("Backend not available, saving locally");
-    }
-
-    // Save to localStorage for persistence
+    // Save to localStorage for persistence (no external backend needed)
     try {
       const saved = JSON.parse(localStorage.getItem('user_sightings') || '[]');
       saved.push(newSighting);
