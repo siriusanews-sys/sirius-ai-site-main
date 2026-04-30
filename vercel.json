@@ -7,14 +7,6 @@
       "config": {
         "distDir": "build"
       }
-    },
-    {
-      "src": "api/gemini.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "api/youtube.js",
-      "use": "@vercel/node"
     }
   ],
   "rewrites": [
