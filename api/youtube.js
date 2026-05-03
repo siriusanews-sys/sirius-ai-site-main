@@ -37,6 +37,8 @@ const buildVideoList = () => {
 };
 
 module.exports = async function handler(req, res) {
+  console.log(`[YOUTUBE] ${req.method} request received from ${req.headers['x-forwarded-for'] || req.socket.remoteAddress}`);
+  
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
