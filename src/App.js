@@ -492,25 +492,30 @@ function App() {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMessage
-        })
+        body: JSON.stringify({ message: userMessage })
       });
 
       console.log('[Frontend] Response status:', response.status);
+      
+      // Parse JSON only once
       const data = await response.json();
       console.log('[Frontend] Response data:', data);
       
+      if (!response.ok) {
+        // Server returned error status
+        throw new Error(data.error || `Server error: ${response.status}`);
+      }
+      
       if (data.response) {
         setChatMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+      } else if (data.error) {
+        throw new Error(data.error);
       } else {
-        throw new Error(data.error || "Invalid response from API");
+        throw new Error("Invalid response from API");
       }
     } catch (error) {
       console.error('[Frontend] Fetch error:', error);
-      console.error('[Frontend] Error name:', error.name);
-      console.error('[Frontend] Error message:', error.message);
-      setChatMessages(prev => [...prev, { role: "assistant", content: "Signal lost... Please check your connection. Error: " + error.message }]);
+      setChatMessages(prev => [...prev, { role: "assistant", content: "Signal lost... " + error.message }]);
     } finally {
       setIsLoading(false);
     }

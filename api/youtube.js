@@ -39,36 +39,64 @@ const buildVideoList = () => {
 module.exports = async function handler(req, res) {
   console.log(`[YOUTUBE] ${req.method} request received from ${req.headers['x-forwarded-for'] || req.socket.remoteAddress}`);
   
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  const { maxResults = 12 } = req.query;
+  let videos = [];
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  // Strategy 1: Try YouTube Data API if key is available
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (apiKey) {
+    try {
+      console.log('[YOUTUBE] Trying YouTube Data API v3...');
+      const publishedAfter = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=UFO%20UAP%20news&type=video&maxResults=${maxResults}&order=relevance&publishedAfter=${publishedAfter}&key=${apiKey}`;
+      
+      const response = await fetch(url, { timeout: 8000 });
+      console.log('[YOUTUBE] YouTube API response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.items && data.items.length > 0) {
+          videos = data.items.map(item => ({
+            video_id: item.id.videoId,
+            title: item.snippet.title,
+            channel: item.snippet.channelTitle,
+            description: item.snippet.description?.substring(0, 200) || '',
+            publishedAt: item.snippet.publishedAt,
+            thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
+            sirius: item.snippet.channelTitle.toLowerCase().includes('sirius')
+          }));
+          console.log('[YOUTUBE] YouTube API returned', videos.length, 'videos');
+        }
+      }
+    } catch (apiError) {
+      console.log('[YOUTUBE] YouTube API failed:', apiError.message);
+    }
+  } else {
+    console.log('[YOUTUBE] No YouTube API key found, skipping API attempt');
   }
 
-  try {
-    // Try to fetch from RSS feeds (no API key needed)
-    const rssFeeds = [
-      'https://www.youtube.com/feeds/videos.xml?channel_id=UC7OqXqhcRZG4HN2MFK8Zjfg', // Example UFO channel
-      'https://www.youtube.com/feeds/videos.xml?channel_id=UCBSnHDm6JcxpI2aAFlWnPJQ'  // Another UFO channel
-    ];
-
-    let videos = [];
-    
-    // Try RSS fetch via rss2json (free, no key needed for basic use)
+  // Strategy 2: Try RSS if API failed or no key
+  if (videos.length === 0) {
     try {
+      console.log('[YOUTUBE] Trying RSS feed...');
       const rssUrl = encodeURIComponent('https://www.youtube.com/feeds/videos.xml?search_query=UFO+UAP+news');
-      const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}&count=12`, { timeout: 5000 });
+      const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}&count=${maxResults}`, { timeout: 5000 });
       
       if (response.ok) {
         const data = await response.json();
         if (data.items && data.items.length > 0) {
           videos = data.items.map(item => {
-            // Extract video ID from YouTube link
             const match = item.link.match(/v=([^&]+)/);
             const videoId = match ? match[1] : null;
             return videoId ? {
@@ -81,26 +109,20 @@ module.exports = async function handler(req, res) {
               sirius: item.author?.toLowerCase().includes('sirius') || false
             } : null;
           }).filter(Boolean);
+          console.log('[YOUTUBE] RSS returned', videos.length, 'videos');
         }
       }
     } catch (rssError) {
-      console.log('RSS fetch failed, using fallback:', rssError.message);
+      console.log('[YOUTUBE] RSS failed:', rssError.message);
     }
-
-    // If RSS failed or returned no videos, use fallback pool
-    if (videos.length === 0) {
-      console.log('Using curated video fallback');
-      videos = buildVideoList();
-    }
-
-    console.log('Returning', videos.length, 'videos');
-    return res.status(200).json(videos);
-  } catch (error) {
-    console.error('YouTube Error:', error);
-    
-    // Always return fallback videos, never an error
-    const fallback = buildVideoList();
-    console.log('Error occurred, returning fallback videos:', fallback.length);
-    return res.status(200).json(fallback);
   }
+
+  // Strategy 3: Static fallback (always works)
+  if (videos.length === 0) {
+    console.log('[YOUTUBE] Using static video fallback');
+    videos = buildVideoList();
+  }
+
+  console.log('[YOUTUBE] Returning', videos.length, 'videos');
+  return res.status(200).json(videos);
 }
