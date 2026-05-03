@@ -484,8 +484,12 @@ function App() {
     setChatMessages(prev => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
 
+    const baseUrl = window.location.origin;
+    const apiUrl = `${baseUrl}/api/gemini`;
+    console.log('[Frontend] Sending request to:', apiUrl);
+
     try {
-      const response = await fetch('/api/gemini', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -493,7 +497,9 @@ function App() {
         })
       });
 
+      console.log('[Frontend] Response status:', response.status);
       const data = await response.json();
+      console.log('[Frontend] Response data:', data);
       
       if (data.response) {
         setChatMessages(prev => [...prev, { role: "assistant", content: data.response }]);
@@ -501,7 +507,10 @@ function App() {
         throw new Error(data.error || "Invalid response from API");
       }
     } catch (error) {
-      setChatMessages(prev => [...prev, { role: "assistant", content: "Signal lost... Please check your connection." }]);
+      console.error('[Frontend] Fetch error:', error);
+      console.error('[Frontend] Error name:', error.name);
+      console.error('[Frontend] Error message:', error.message);
+      setChatMessages(prev => [...prev, { role: "assistant", content: "Signal lost... Please check your connection. Error: " + error.message }]);
     } finally {
       setIsLoading(false);
     }
