@@ -491,7 +491,8 @@ function App() {
         body: JSON.stringify({ message: userMessage })
       });
       
-      const result = await response.json();
+      const text = await response.text();
+      const result = JSON.parse(text);
       if (!response.ok) throw new Error(result.error || 'Server Error');
       setChatMessages(prev => [...prev, { role: 'assistant', content: result.response || result.reply }]);
     } catch (error) {
