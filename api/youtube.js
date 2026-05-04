@@ -62,7 +62,6 @@ module.exports = async function handler(req, res) {
       const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=UFO%20UAP%20news&type=video&maxResults=${maxResults}&order=relevance&publishedAfter=${publishedAfter}&key=${apiKey}`;
       
       const response = await fetch(url, { timeout: 8000 });
-      console.log('[YOUTUBE] YouTube API response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();

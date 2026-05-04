@@ -495,11 +495,8 @@ function App() {
         body: JSON.stringify({ message: userMessage })
       });
 
-      console.log('[Frontend] Response status:', response.status);
-      
       // Parse JSON only once
       const data = await response.json();
-      console.log('[Frontend] Response data:', data);
       
       if (!response.ok) {
         // Server returned error status
