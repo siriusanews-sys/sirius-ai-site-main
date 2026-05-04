@@ -498,7 +498,6 @@ function App() {
           const distAU = parseFloat(dist);
           const distKm = distAU * 149597870.7; // AU to km
           const distLunar = distAU * 389.17; // AU to lunar distances
-          // Absolute magnitude H to approx diameter (assuming albedo 0.14)
           const absH = parseFloat(h);
           const diamM = 1329 / Math.sqrt(0.14) * Math.pow(10, -0.2 * absH) * 1000;
           
