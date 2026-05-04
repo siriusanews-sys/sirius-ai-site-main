@@ -9,6 +9,11 @@
       }
     }
   ],
+  "functions": {
+    "api/*.js": {
+      "memory": 1024
+    }
+  },
   "rewrites": [
     {
       "source": "/api/gemini",

@@ -494,25 +494,13 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage })
       });
-
-      // Parse JSON only once
-      const data = await response.json();
       
-      if (!response.ok) {
-        // Server returned error status
-        throw new Error(data.error || `Server error: ${response.status}`);
-      }
-      
-      if (data.response) {
-        setChatMessages(prev => [...prev, { role: "assistant", content: data.response }]);
-      } else if (data.error) {
-        throw new Error(data.error);
-      } else {
-        throw new Error("Invalid response from API");
-      }
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Server Error');
+      setChatMessages(prev => [...prev, { role: 'assistant', content: result.response || result.reply }]);
     } catch (error) {
       console.error('[Frontend] Fetch error:', error);
-      setChatMessages(prev => [...prev, { role: "assistant", content: "Signal lost... " + error.message }]);
+      setChatMessages(prev => [...prev, { role: 'assistant', content: "Signal lost... " + error.message }]);
     } finally {
       setIsLoading(false);
     }
