@@ -491,10 +491,17 @@ function App() {
         body: JSON.stringify({ message: userMessage })
       });
       
-      const text = await response.text();
-      const result = JSON.parse(text);
-      if (!response.ok) throw new Error(result.error || 'Server Error');
-      setChatMessages(prev => [...prev, { role: 'assistant', content: result.response || result.reply }]);
+      const rawText = await response.text(); // THE ONLY READ CALL
+      console.log('[Frontend] Raw response received'); 
+
+      try {
+        const data = JSON.parse(rawText);
+        if (!response.ok) throw new Error(data.error || 'Server Error');
+        setChatMessages(prev => [...prev, { role: 'assistant', content: data.reply || data.response }]);
+      } catch (parseError) {
+        console.error('Parsing failed:', rawText);
+        throw new Error('Invalid response format');
+      }
     } catch (error) {
       console.error('[Frontend] Fetch error:', error);
       setChatMessages(prev => [...prev, { role: 'assistant', content: "Signal lost... " + error.message }]);
