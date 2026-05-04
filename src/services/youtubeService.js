@@ -5,7 +5,6 @@ export const fetchUFOVideos = async (maxResults = 12) => {
   
   try {
     const response = await fetch(apiUrl);
-    console.log('[Frontend] YouTube response status:', response.status);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
