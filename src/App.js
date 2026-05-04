@@ -485,16 +485,16 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/sirius-final-v1', {
+      const res = await fetch('/api/sirius-final-v1', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage })
       });
       
-      const data = await response.json();
+      const data = await res.json();
       
-      if (!response.ok) {
-        throw new Error(data.error || `Server error: ${response.status}`);
+      if (data.error) {
+        throw new Error(data.error);
       }
       
       setChatMessages(prev => [...prev, { role: 'assistant', content: data.reply || data.response }]);

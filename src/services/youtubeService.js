@@ -1,17 +1,15 @@
 export const fetchUFOVideos = async (maxResults = 12) => {
   const baseUrl = window.location.origin;
   const apiUrl = `${baseUrl}/api/youtube?maxResults=${maxResults}`;
-  console.log('[Frontend] Fetching videos from:', apiUrl);
   
   try {
-    const response = await fetch(apiUrl);
+    const res = await fetch(apiUrl);
+    const videos = await res.json();
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (videos.error) {
+      throw new Error(videos.error);
     }
     
-    const videos = await response.json();
-    console.log('[Frontend] Videos received:', videos.length);
     return videos;
   } catch (error) {
     console.error('[Frontend] YouTube fetch error:', error);
@@ -21,13 +19,8 @@ export const fetchUFOVideos = async (maxResults = 12) => {
 
 export const getVideoDetails = async (videoId) => {
   try {
-    const response = await fetch(`/api/youtube/details?videoId=${videoId}`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
+    const res = await fetch(`/api/youtube/details?videoId=${videoId}`);
+    const data = await res.json();
 
     if (data.error) {
       throw new Error(data.error);
