@@ -485,7 +485,7 @@ function App() {
     setIsLoading(true);
 
     const baseUrl = window.location.origin;
-    const apiUrl = `${baseUrl}/api/gemini`;
+    const apiUrl = `${baseUrl}/api/sirius-query?t=${Date.now()}`;
     console.log('[Frontend] Sending request to:', apiUrl);
 
     try {

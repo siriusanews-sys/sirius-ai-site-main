@@ -7,8 +7,8 @@
   },
   "rewrites": [
     {
-      "source": "/api/gemini",
-      "destination": "/api/gemini.js"
+      "source": "/api/sirius-query",
+      "destination": "/api/sirius-query.js"
     },
     {
       "source": "/api/youtube",
