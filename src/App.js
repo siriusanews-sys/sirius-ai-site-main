@@ -484,12 +484,8 @@ function App() {
     setChatMessages(prev => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
 
-    const baseUrl = window.location.origin;
-    const apiUrl = `${baseUrl}/api/sirius-query?t=${Date.now()}`;
-    console.log('[Frontend] Sending request to:', apiUrl);
-
     try {
-      const response = await fetch(apiUrl, {
+      const response = await fetch('/api/sirius-query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage })
