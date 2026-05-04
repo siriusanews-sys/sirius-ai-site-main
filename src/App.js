@@ -485,25 +485,25 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/sirius-query', {
+      const response = await fetch('/api/sirius-final-v1', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage })
       });
       
-      const rawText = await response.text(); // THE ONLY READ CALL
-      console.log('[Frontend] Raw response received'); 
+      const siriusRawData = await response.text(); // THE ONLY READ CALL
+      console.log('[Frontend] Sirius response received'); 
 
       try {
-        const data = JSON.parse(rawText);
-        if (!response.ok) throw new Error(data.error || 'Server Error');
-        setChatMessages(prev => [...prev, { role: 'assistant', content: data.reply || data.response }]);
+        const result = JSON.parse(siriusRawData);
+        if (!response.ok) throw new Error(result.error || 'Server Error');
+        setChatMessages(prev => [...prev, { role: 'assistant', content: result.reply || result.response }]);
       } catch (parseError) {
-        console.error('Parsing failed:', rawText);
+        console.error('Sirius parsing failed:', siriusRawData);
         throw new Error('Invalid response format');
       }
     } catch (error) {
-      console.error('[Frontend] Fetch error:', error);
+      console.error('[Frontend] Sirius fetch error:', error);
       setChatMessages(prev => [...prev, { role: 'assistant', content: "Signal lost... " + error.message }]);
     } finally {
       setIsLoading(false);
