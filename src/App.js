@@ -491,12 +491,13 @@ function App() {
         body: JSON.stringify({ message: userMessage })
       });
       
-      // Use response.clone() to be 100% safe from body stream error
-      const clonedResponse = response.clone();
-      const result = await clonedResponse.json();
+      const data = await response.json();
       
-      if (!response.ok) throw new Error(result.error || 'Server Error');
-      setChatMessages(prev => [...prev, { role: 'assistant', content: result.reply || result.response }]);
+      if (!response.ok) {
+        throw new Error(data.error || `Server error: ${response.status}`);
+      }
+      
+      setChatMessages(prev => [...prev, { role: 'assistant', content: data.reply || data.response }]);
     } catch (error) {
       console.error('[Frontend] Sirius fetch error:', error);
       setChatMessages(prev => [...prev, { role: 'assistant', content: "Signal lost... " + error.message }]);
