@@ -491,17 +491,12 @@ function App() {
         body: JSON.stringify({ message: userMessage })
       });
       
-      const siriusRawData = await response.text(); // THE ONLY READ CALL
-      console.log('[Frontend] Sirius response received'); 
-
-      try {
-        const result = JSON.parse(siriusRawData);
-        if (!response.ok) throw new Error(result.error || 'Server Error');
-        setChatMessages(prev => [...prev, { role: 'assistant', content: result.reply || result.response }]);
-      } catch (parseError) {
-        console.error('Sirius parsing failed:', siriusRawData);
-        throw new Error('Invalid response format');
-      }
+      // Use response.clone() to be 100% safe from body stream error
+      const clonedResponse = response.clone();
+      const result = await clonedResponse.json();
+      
+      if (!response.ok) throw new Error(result.error || 'Server Error');
+      setChatMessages(prev => [...prev, { role: 'assistant', content: result.reply || result.response }]);
     } catch (error) {
       console.error('[Frontend] Sirius fetch error:', error);
       setChatMessages(prev => [...prev, { role: 'assistant', content: "Signal lost... " + error.message }]);
