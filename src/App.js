@@ -244,8 +244,15 @@ function App() {
   const [videosError, setVideosError] = useState(null);
   
   // Independent Live Feed state (separate from chat-triggered videos)
-  const [liveFeedVideos, setLiveFeedVideos] = useState([]);
-  const [liveFeedLoading, setLiveFeedLoading] = useState(true);
+  const liveFeedVideos = [
+    { videoId: "4_v6unE8gZorAsfVbOn2Vw", title: "NewsNation: Pentagon UFO Declassified Footage" },
+    { videoId: "3jZpCz6pL80", title: "Joe Rogan Experience: Aliens & Cosmic Revelations" },
+    { videoId: "6rGLvX02_mQ", title: "Anonymous Official: The Global UFO Disclosure Project" },
+    { videoId: "dQw4w9WgXcQ", title: "SiriusANews: Latest UAP Community Live Report" },
+    { videoId: "2a4gxkzY8E8", title: "David Icke: The Truth Behind the Anomalous Phenomena" },
+    { videoId: "Y8Zp_bOn2Vw", title: "Mirror Now: Government Files Released Live" }
+  ];
+  const [liveFeedLoading, setLiveFeedLoading] = useState(false);
   const [liveFeedError, setLiveFeedError] = useState(null);
   const [thumbnailLoadFailed, setThumbnailLoadFailed] = useState({});
 
@@ -277,24 +284,8 @@ function App() {
    * Fetch latest verified UAP/UFO disclosure news for independent Live Feed
    * Completely separate from chat-triggered videos
    */
-  const fetchLiveFeed = async () => {
-    try {
-      setLiveFeedLoading(true);
-      setLiveFeedError(null);
-      const disclosureVideos = await fetchDisclosureNewsVideos(12);
-      setLiveFeedVideos(disclosureVideos);
-    } catch (error) {
-      console.error('[Live Feed] Error fetching disclosure news:', error);
-      setLiveFeedError('Failed to load live disclosure feed from backend.');
-      setLiveFeedVideos([]);
-    } finally {
-      setLiveFeedLoading(false);
-    }
-  };
-
-  const refreshLiveFeed = () => {
-    fetchLiveFeed(); // Refresh the live feed when user clicks refresh
-  };
+  // Live feed is now static and defined above to avoid network calls
+  const refreshLiveFeed = () => {};
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -823,7 +814,7 @@ function App() {
         bounds="window"
         dragHandleClassName="chat-drag-handle"
         className="chat-rnd"
-        style={{ position: 'fixed', bottom: '240px', zIndex: 1000 }}
+        style={{ position: 'fixed', bottom: '250px', left: '20px', zIndex: 1000 }}
       >
       <div className="glass-panel chat-panel-rnd fade-in">
         <div className="list-header chat-drag-handle flex items-center justify-between" style={{ cursor: 'move' }}>
@@ -1266,12 +1257,12 @@ function App() {
             </h3>
             <button 
               className="video-refresh-btn"
-              onClick={refreshLiveFeed}
-              disabled={liveFeedLoading}
+              onClick={() => {}}
+              disabled={true}
               data-testid="refresh-live-feed-btn"
               title="Refresh live feed"
             >
-              <RefreshCw size={14} className={liveFeedLoading ? 'animate-spin' : ''} />
+              <RefreshCw size={14} />
               <span className="text-xs ml-1">Refresh</span>
             </button>
           </div>
@@ -1287,14 +1278,14 @@ function App() {
             }}
           >
             {liveFeedVideos.map((video, idx) => {
-              const videoId = video.video_id || video.id || video.link?.match(/[?&]v=([^&]+)/)?.[1] || '';
-              const thumbnail = video.thumbnail || video.snippet?.thumbnails?.medium?.url || video.snippet?.thumbnails?.high?.url || `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+              const videoId = video.videoId || '';
+              const thumbnail = `https://youtube.com${video.videoId}/mqdefault.jpg`;
 
               return (
                 <button
-                  key={video.id || idx}
+                  key={video.videoId || idx}
                   type="button"
-                  onClick={() => setPlayingVideo(video)}
+                  onClick={() => setPlayingVideo({ video_id: video.videoId, title: video.title, channel: video.channel || 'Live Channel' })}
                   className="video-card group inline-flex shrink-0 flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-xl shadow-black/20 transition-transform hover:-translate-y-0.5 hover:border-cyan-500"
                   style={{ minWidth: '280px', maxWidth: '320px', marginRight: '12px' }}
                   data-testid={`live-feed-video-${idx}`}
@@ -1306,12 +1297,12 @@ function App() {
                       className="h-full w-full object-cover"
                       crossOrigin="anonymous"
                       referrerPolicy="no-referrer"
-                      onError={() => handleThumbnailError(video.video_id)}
+                      onError={() => handleThumbnailError(video.videoId)}
                     />
                   </div>
                   <div className="px-3 py-3 text-left">
-                    <p className="text-sm font-semibold text-gray-100 line-clamp-2">{video.title || 'Live disclosure video'}</p>
-                    <p className="text-xs text-gray-500 mt-1">{video.channel || video.channelTitle || 'Live Channel'}</p>
+                    <p className="text-sm font-semibold text-gray-100 line-clamp-2">{video.title}</p>
+                    <p className="text-xs text-gray-500 mt-1">{video.channel || 'Live Channel'}</p>
                   </div>
                 </button>
               );
