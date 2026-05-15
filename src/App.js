@@ -1276,62 +1276,48 @@ function App() {
               <span className="text-xs ml-1">Refresh</span>
             </button>
           </div>
-          <div className="video-scroll hide-scrollbar" style={{ maxHeight: '180px' }}>
-            {liveFeedLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="animate-spin text-cyan-400 mr-2" size={20} />
-                <span className="text-sm text-gray-400">Loading disclosure news...</span>
-              </div>
-            ) : liveFeedError ? (
-              <div className="flex flex-col items-center justify-center py-8">
-                <AlertTriangle className="text-red-400 mb-2" size={20} />
-                <span className="text-sm text-red-400">{liveFeedError}</span>
-                <button 
-                  onClick={refreshLiveFeed}
-                  className="mt-2 text-xs text-cyan-400 hover:text-cyan-300"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : liveFeedVideos.length === 0 ? (
-              <div className="flex items-center justify-center py-8">
-                <span className="text-sm text-gray-400">No disclosure news videos found</span>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 px-2 py-1">
-                {liveFeedVideos.map((video, idx) => {
-                  const videoId = video.video_id || video.id || video.link?.match(/[?&]v=([^&]+)/)?.[1] || '';
-                  const videoLink = videoId ? `https://www.youtube.com/watch?v=${videoId}` : video.link || '#';
-                  const thumbnail = video.snippet?.thumbnails?.medium?.url || video.snippet?.thumbnails?.high?.url || video.thumbnail || `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+          <div
+            className="video-scroll hide-scrollbar"
+            style={{
+              maxHeight: '180px',
+              display: 'flex',
+              flexDirection: 'row',
+              overflowX: 'auto',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {liveFeedVideos.map((video, idx) => {
+              const videoId = video.video_id || video.id || video.link?.match(/[?&]v=([^&]+)/)?.[1] || '';
+              const videoLink = videoId ? `https://www.youtube.com/watch?v=${videoId}` : video.link || '#';
+              const thumbnail = video.snippet?.thumbnails?.medium?.url || video.snippet?.thumbnails?.high?.url || video.thumbnail || `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
-                  return (
-                    <a
-                      key={video.video_id || idx}
-                      href={videoLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="video-card group block overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-xl shadow-black/20 transition-transform hover:-translate-y-0.5 hover:border-cyan-500"
-                      data-testid={`live-feed-video-${idx}`}
-                    >
-                      <div className="video-thumbnail-wrapper h-28 overflow-hidden bg-slate-900">
-                        <img
-                          src={thumbnail}
-                          alt={video.title}
-                          className="h-full w-full object-cover"
-                          crossOrigin="anonymous"
-                          referrerPolicy="no-referrer"
-                          onError={() => handleThumbnailError(video.video_id)}
-                        />
-                      </div>
-                      <div className="px-3 py-3">
-                        <p className="text-sm font-semibold text-gray-100 line-clamp-2">{video.title || 'Live disclosure video'}</p>
-                        <p className="text-xs text-gray-500 mt-1">{video.channel || 'YouTube'}</p>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
-            )}
+              return (
+                <a
+                  key={video.video_id || idx}
+                  href={videoLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="video-card group inline-flex shrink-0 flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-xl shadow-black/20 transition-transform hover:-translate-y-0.5 hover:border-cyan-500"
+                  style={{ minWidth: '280px', maxWidth: '320px' }}
+                  data-testid={`live-feed-video-${idx}`}
+                >
+                  <div className="video-thumbnail-wrapper h-28 overflow-hidden bg-slate-900">
+                    <img
+                      src={thumbnail}
+                      alt={video.title}
+                      className="h-full w-full object-cover"
+                      crossOrigin="anonymous"
+                      referrerPolicy="no-referrer"
+                      onError={() => handleThumbnailError(video.video_id)}
+                    />
+                  </div>
+                  <div className="px-3 py-3">
+                    <p className="text-sm font-semibold text-gray-100 line-clamp-2">{video.title || 'Live disclosure video'}</p>
+                    <p className="text-xs text-gray-500 mt-1">{video.channel || 'YouTube'}</p>
+                  </div>
+                </a>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -65,8 +65,14 @@ module.exports = async function handler(req, res) {
   try {
     console.log('[YOUTUBE] Fetching rss2json JSON feed for query:', query);
     const rssUrl = `https://www.youtube.com/feeds/videos.xml?search_query=${encodeURIComponent(query)}`;
-    const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=${maxResults}`;
-    const response = await axios.get(proxyUrl, { timeout: 10000 });
+    const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=${maxResults}&_=${Date.now()}`;
+    const response = await axios.get(proxyUrl, {
+      timeout: 10000,
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache'
+      }
+    });
 
     if (response.data?.status === 'ok' && Array.isArray(response.data.items)) {
       videos = response.data.items.slice(0, maxResults).map(item => {
