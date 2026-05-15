@@ -31,7 +31,7 @@ import { Input } from "./components/ui/input";
 import { ScrollArea } from "./components/ui/scroll-area";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
-import { fetchUFOVideos, fetchDisclosureNewsVideos } from "./services/youtubeService";
+import { fetchUFOVideos } from "./services/youtubeService";
 import { geocodeLocation } from "./lib/utils";
 
 // Using Vercel serverless functions at /api/* - no external backend needed
@@ -281,13 +281,27 @@ function App() {
     try {
       setLiveFeedLoading(true);
       setLiveFeedError(null);
-      const disclosureVideos = await fetchDisclosureNewsVideos(12);
-      setLiveFeedVideos(disclosureVideos);
+      const response = await axios.get('https://api.spaceflightnewsapi.net/v3/articles?_limit=12', {
+        timeout: 10000
+      });
+      const articles = Array.isArray(response.data) ? response.data : [];
+      const cosmicFeed = articles.map(item => ({
+        id: item.id,
+        title: item.title,
+        channel: item.newsSite || 'Spaceflight News',
+        description: item.summary || item.title,
+        publishedAt: item.publishedAt,
+        thumbnail: item.imageUrl || item.imageUrl || 'https://via.placeholder.com/320x180?text=Space+News',
+        url: item.url
+      }));
+      if (cosmicFeed.length === 0) {
+        setLiveFeedError('No cosmic news available right now.');
+      }
+      setLiveFeedVideos(cosmicFeed);
     } catch (error) {
-      console.error('[Live Feed] Error fetching disclosure news:', error);
-      setLiveFeedError('Failed to load disclosure news from YouTube');
-      // Fallback to static videos if API fails
-      setLiveFeedVideos(STATIC_VIDEOS);
+      console.error('[Live Feed] Error fetching cosmic news:', error);
+      setLiveFeedError('Failed to load cosmic news feed.');
+      setLiveFeedVideos([]);
     } finally {
       setLiveFeedLoading(false);
     }
@@ -824,7 +838,7 @@ function App() {
         bounds="window"
         dragHandleClassName="chat-drag-handle"
         className="chat-rnd"
-        style={{ zIndex: 100, position: 'fixed', bottom: '230px' }}
+        style={{ zIndex: 100, position: 'fixed', bottom: '240px' }}
       >
       <div className="glass-panel chat-panel-rnd fade-in">
         <div className="list-header chat-drag-handle flex items-center justify-between" style={{ cursor: 'move' }}>
@@ -1291,10 +1305,11 @@ function App() {
               const thumbnail = video.snippet?.thumbnails?.medium?.url || video.snippet?.thumbnails?.high?.url || video.thumbnail || `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
               return (
-                <button
-                  key={video.video_id || idx}
-                  type="button"
-                  onClick={() => setPlayingVideo(video)}
+                <a
+                  key={video.id || idx}
+                  href={video.url || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="video-card group inline-flex shrink-0 flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-xl shadow-black/20 transition-transform hover:-translate-y-0.5 hover:border-cyan-500"
                   style={{ minWidth: '280px', maxWidth: '320px', marginRight: '12px' }}
                   data-testid={`live-feed-video-${idx}`}
@@ -1310,10 +1325,10 @@ function App() {
                     />
                   </div>
                   <div className="px-3 py-3 text-left">
-                    <p className="text-sm font-semibold text-gray-100 line-clamp-2">{video.title || 'Live disclosure video'}</p>
-                    <p className="text-xs text-gray-500 mt-1">{video.channel || 'YouTube'}</p>
+                    <p className="text-sm font-semibold text-gray-100 line-clamp-2">{video.title || 'Live cosmic news'}</p>
+                    <p className="text-xs text-gray-500 mt-1">{video.channel || 'Spaceflight News'}</p>
                   </div>
-                </button>
+                </a>
               );
             })}
           </div>
