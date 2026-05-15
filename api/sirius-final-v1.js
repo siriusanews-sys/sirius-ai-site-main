@@ -22,7 +22,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Check API key
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
     
     if (!apiKey) {
       console.error('[GEMINI] No API key found');

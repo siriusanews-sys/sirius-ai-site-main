@@ -54,7 +54,7 @@ module.exports = async function handler(req, res) {
   let videos = [];
 
   // Strategy 1: Try YouTube Data API if key is available
-  const apiKey = process.env.YOUTUBE_API_KEY;
+  const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
   if (apiKey) {
     try {
       console.log('[YOUTUBE] Trying YouTube Data API v3...');
