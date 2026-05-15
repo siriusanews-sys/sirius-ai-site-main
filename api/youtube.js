@@ -38,6 +38,17 @@ const buildVideoList = () => {
   return [sirius, ...others.slice(0, 11)];
 };
 
+const ALLOWED_CHANNEL_IDS = [
+  'UCwS08w9FaCbywN9Nsh0rcbA', // NewsNation
+  'UCzQUP1qoWDoEbmsQxvdjxgQ', // Joe Rogan (PowerfulJRE)
+  'UC8Cl9QaRtu0m9Fca7p97uWg', // Anonymous Official
+  'UCqvd_wI_4vWv9Y46G8w7Wqw', // Reuters
+  'UCXIJgGwBQKuHte_6uY3SGwA', // Fox News
+  'UC786Hba2W8L_IDV_T39Y8Cg', // Mirror Now
+  'UCb369XInT_jRno68E7XNffA', // David Icke
+  'UC_vS08w9FaCbywN9Nsh0rcbA'  // SiriusANews
+];
+
 export default async function handler(req, res) {
   console.log(`[YOUTUBE] ${req.method} request received from ${req.headers['x-forwarded-for'] || req.socket.remoteAddress}`);
   
@@ -52,16 +63,16 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { maxResults = 12, searchQuery = '' } = req.query;
-  const query = searchQuery || 'Pentagon UFO 2026';
+  const { maxResults = 8 } = req.query;
+  const selectedChannel = ALLOWED_CHANNEL_IDS[Math.floor(Math.random() * ALLOWED_CHANNEL_IDS.length)];
   let videos = [];
 
-  // Strategy 1: Official YouTube Data API using the active API key and order=date
+  // Strategy 1: Official YouTube Data API using the selected allowed channel
   const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
   if (apiKey) {
     try {
-      console.log('[YOUTUBE] Using YouTube Data API v3 for query:', query);
-      const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=${maxResults}&order=date&key=${apiKey}`;
+      console.log('[YOUTUBE] Using YouTube Data API v3 for channel:', selectedChannel);
+      const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${selectedChannel}&type=video&maxResults=${maxResults}&order=date&key=${apiKey}`;
       const ytResponse = await axios.get(ytUrl, {
         timeout: 12000,
         headers: {
@@ -81,7 +92,7 @@ export default async function handler(req, res) {
           snippet: item.snippet,
           sirius: item.snippet.channelTitle?.toLowerCase().includes('sirius') || false
         }));
-        console.log('[YOUTUBE] YouTube Data API returned', videos.length, 'videos');
+        console.log('[YOUTUBE] YouTube Data API returned', videos.length, 'videos from channel:', selectedChannel);
       }
     } catch (apiError) {
       console.log('[YOUTUBE] YouTube Data API failed:', apiError.message);
@@ -91,6 +102,7 @@ export default async function handler(req, res) {
   // Strategy 2: XML fallback from an unblocked global disclosure search feed
   if (videos.length === 0) {
     try {
+      const query = 'Pentagon UFO 2026';
       console.log('[YOUTUBE] Falling back to live XML search feed for query:', query);
       const rssUrl = `https://www.youtube.com/feeds/videos.xml?search_query=${encodeURIComponent(query)}`;
       const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}&_=${Date.now()}`;
