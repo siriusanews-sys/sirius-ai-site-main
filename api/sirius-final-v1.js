@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
               text: `You are Sirius AI, a UFO/UAP expert. Answer: ${message}` 
             }] 
           }],
-          generationConfig: { maxOutputTokens: 1000 }
+          generationConfig: { maxOutputTokens: 4096 }
         })
       });
     } catch (fetchError) {
