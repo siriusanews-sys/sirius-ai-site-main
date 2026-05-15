@@ -602,6 +602,8 @@
 
 /* Draggable/Resizable Chat Panel */
 .chat-rnd {
+    position: fixed !important;
+    bottom: 230px !important;
     z-index: 100;
 }
 

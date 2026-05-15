@@ -824,7 +824,7 @@ function App() {
         bounds="window"
         dragHandleClassName="chat-drag-handle"
         className="chat-rnd"
-        style={{ zIndex: 100, position: 'fixed', bottom: '220px' }}
+        style={{ zIndex: 100, position: 'fixed', bottom: '230px' }}
       >
       <div className="glass-panel chat-panel-rnd fade-in">
         <div className="list-header chat-drag-handle flex items-center justify-between" style={{ cursor: 'move' }}>
