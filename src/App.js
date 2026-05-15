@@ -485,13 +485,11 @@ function App() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/sirius-final-v1', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage })
+      const res = await axios.post('/api/sirius-final-v1', { message: userMessage }, {
+        headers: { 'Content-Type': 'application/json' }
       });
       
-      const data = await res.json();
+      const data = res.data;
       
       if (data.error) {
         throw new Error(data.error);
@@ -499,8 +497,8 @@ function App() {
       
       setChatMessages(prev => [...prev, { role: 'assistant', content: data.reply || data.response }]);
     } catch (error) {
-      console.error('[Frontend] Sirius fetch error:', error);
-      setChatMessages(prev => [...prev, { role: 'assistant', content: "Signal lost... " + error.message }]);
+      console.error('[Frontend] Sirius axios error:', error);
+      setChatMessages(prev => [...prev, { role: 'assistant', content: "Signal lost... " + (error.response?.data?.error || error.message) }]);
     } finally {
       setIsLoading(false);
     }

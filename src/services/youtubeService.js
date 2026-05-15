@@ -1,10 +1,12 @@
+import axios from "axios";
+
 export const fetchUFOVideos = async (maxResults = 12) => {
   const baseUrl = window.location.origin;
   const apiUrl = `${baseUrl}/api/youtube?maxResults=${maxResults}`;
   
   try {
-    const res = await fetch(apiUrl);
-    const videos = await res.json();
+    const res = await axios.get(apiUrl);
+    const videos = res.data;
     
     if (videos.error) {
       throw new Error(videos.error);
@@ -12,15 +14,15 @@ export const fetchUFOVideos = async (maxResults = 12) => {
     
     return videos;
   } catch (error) {
-    console.error('[Frontend] YouTube fetch error:', error);
+    console.error('[Frontend] YouTube axios error:', error);
     throw error;
   }
 };
 
 export const getVideoDetails = async (videoId) => {
   try {
-    const res = await fetch(`/api/youtube/details?videoId=${videoId}`);
-    const data = await res.json();
+    const res = await axios.get(`/api/youtube/details?videoId=${videoId}`);
+    const data = res.data;
 
     if (data.error) {
       throw new Error(data.error);
