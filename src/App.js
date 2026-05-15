@@ -165,7 +165,7 @@ const VIDEO_POOL = [
   { video_id: "ZrsVVGgANC8", title: "Avi Loeb on Interstellar Objects", channel: "Lex Fridman", sirius: false }
 ].map(v => ({
   ...v,
-  thumbnail: `https://img.youtube.com/vi/${v.video_id}/mqdefault.jpg`
+  thumbnail: `https://img.youtube.com/vi/${v.video_id}/hqdefault.jpg`
 }));
 
 // Curated fallback NEO list (used when API fails)
@@ -247,6 +247,11 @@ function App() {
   const [liveFeedVideos, setLiveFeedVideos] = useState([]);
   const [liveFeedLoading, setLiveFeedLoading] = useState(true);
   const [liveFeedError, setLiveFeedError] = useState(null);
+  const [thumbnailLoadFailed, setThumbnailLoadFailed] = useState({});
+
+  const handleThumbnailError = (videoId) => {
+    setThumbnailLoadFailed(prev => ({ ...prev, [videoId]: true }));
+  };
   
   const fetchVideos = async () => {
     try {
@@ -950,13 +955,23 @@ function App() {
                           className="video-card cursor-pointer hover:scale-105 transition-transform"
                           onClick={() => setPlayingVideo(video)}
                         >
+                          <div className="video-thumbnail-wrapper w-full h-24 rounded overflow-hidden bg-slate-900 flex items-center justify-center">
+                        {!thumbnailLoadFailed[video.video_id] ? (
                           <img 
-                            src={video.thumbnail} 
+                            src={`https://img.youtube.com/vi/${video.video_id}/hqdefault.jpg`} 
                             alt={video.title}
-                            className="w-full h-24 object-cover rounded"
-                            onError={(e) => e.target.src = `https://img.youtube.com/vi/${video.video_id}/mqdefault.jpg`}
+                            className="w-full h-full object-cover"
+                            crossOrigin="anonymous"
+                            referrerPolicy="no-referrer"
+                            onError={() => handleThumbnailError(video.video_id)}
                           />
-                          <p className="text-xs mt-1 line-clamp-2">{video.title}</p>
+                        ) : (
+                          <div className="w-full h-full bg-slate-950 flex items-center justify-center text-white">
+                            <Play size={28} />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs mt-1 line-clamp-2">{video.title}</p>
                         </div>
                       ))}
                     </div>
@@ -1291,14 +1306,22 @@ function App() {
                   data-testid={`live-feed-video-${idx}`}
                 >
                   {video.sirius && <span className="sirius-badge">SIRIUS</span>}
-                  <img 
-                    src={video.thumbnail} 
-                    alt={video.title}
-                    className="video-thumbnail"
-                    onError={(e) => {
-                      e.target.src = `https://img.youtube.com/vi/${video.video_id}/mqdefault.jpg`;
-                    }}
-                  />
+                  <div className="video-thumbnail-wrapper w-full h-32 rounded overflow-hidden bg-slate-900 flex items-center justify-center">
+                    {!thumbnailLoadFailed[video.video_id] ? (
+                      <img
+                        src={`https://img.youtube.com/vi/${video.video_id}/hqdefault.jpg`}
+                        alt={video.title}
+                        className="w-full h-full object-cover"
+                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
+                        onError={() => handleThumbnailError(video.video_id)}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-slate-950 flex items-center justify-center text-white">
+                        <Play size={32} />
+                      </div>
+                    )}
+                  </div>
                   <p className="video-title text-gray-300">{video.title}</p>
                   <p className="text-xs text-gray-500">{video.channel}</p>
                 </div>
