@@ -19,6 +19,39 @@ export const fetchUFOVideos = async (maxResults = 12) => {
   }
 };
 
+/**
+ * Fetch verified global UAP/UFO disclosure news videos
+ * Used for the independent Live Feed at the bottom
+ */
+export const fetchDisclosureNewsVideos = async (maxResults = 12) => {
+  const baseUrl = window.location.origin;
+  
+  // Verified search queries for official disclosure and credible news sources
+  const searchQueries = [
+    'US government declassified UFO footage',
+    'AARO UAP official videos',
+    'Pentagon UFO disclosure'
+  ];
+  
+  // Randomly pick one of the search queries for variety
+  const selectedQuery = searchQueries[Math.floor(Math.random() * searchQueries.length)];
+  const apiUrl = `${baseUrl}/api/youtube?maxResults=${maxResults}&searchQuery=${encodeURIComponent(selectedQuery)}`;
+  
+  try {
+    const res = await axios.get(apiUrl);
+    const videos = res.data;
+    
+    if (videos.error) {
+      throw new Error(videos.error);
+    }
+    
+    return videos;
+  } catch (error) {
+    console.error('[Frontend] Disclosure news fetch error:', error);
+    throw error;
+  }
+};
+
 export const getVideoDetails = async (videoId) => {
   try {
     const res = await axios.get(`/api/youtube/details?videoId=${videoId}`);

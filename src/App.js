@@ -31,7 +31,7 @@ import { Input } from "./components/ui/input";
 import { ScrollArea } from "./components/ui/scroll-area";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
-import { fetchUFOVideos } from "./services/youtubeService";
+import { fetchUFOVideos, fetchDisclosureNewsVideos } from "./services/youtubeService";
 import { geocodeLocation } from "./lib/utils";
 
 // Using Vercel serverless functions at /api/* - no external backend needed
@@ -243,6 +243,11 @@ function App() {
   const [videosLoading, setVideosLoading] = useState(true);
   const [videosError, setVideosError] = useState(null);
   
+  // Independent Live Feed state (separate from chat-triggered videos)
+  const [liveFeedVideos, setLiveFeedVideos] = useState([]);
+  const [liveFeedLoading, setLiveFeedLoading] = useState(true);
+  const [liveFeedError, setLiveFeedError] = useState(null);
+  
   const fetchVideos = async () => {
     try {
       setVideosLoading(true);
@@ -261,6 +266,30 @@ function App() {
 
   const shuffleVideos = () => {
     fetchVideos(); // Re-fetch videos when shuffling
+  };
+
+  /**
+   * Fetch latest verified UAP/UFO disclosure news for independent Live Feed
+   * Completely separate from chat-triggered videos
+   */
+  const fetchLiveFeed = async () => {
+    try {
+      setLiveFeedLoading(true);
+      setLiveFeedError(null);
+      const disclosureVideos = await fetchDisclosureNewsVideos(12);
+      setLiveFeedVideos(disclosureVideos);
+    } catch (error) {
+      console.error('[Live Feed] Error fetching disclosure news:', error);
+      setLiveFeedError('Failed to load disclosure news from YouTube');
+      // Fallback to static videos if API fails
+      setLiveFeedVideos(STATIC_VIDEOS);
+    } finally {
+      setLiveFeedLoading(false);
+    }
+  };
+
+  const refreshLiveFeed = () => {
+    fetchLiveFeed(); // Refresh the live feed when user clicks refresh
   };
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
@@ -440,12 +469,9 @@ function App() {
     fetchVideos();
   }, []);
 
-  // Auto-refresh videos every 3 minutes
+  // Independent Live Feed: Fetch latest disclosure news automatically on mount
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchVideos();
-    }, 180000);
-    return () => clearInterval(interval);
+    fetchLiveFeed();
   }, []);
 
   // Open reader modal - no external fetch, just show summary and link
@@ -1216,52 +1242,53 @@ function App() {
         </div>
       )}
 
-      {/* Video Bar */}
+      {/* Video Bar - Independent Live Media Feed */}
       <div className="video-bar" data-testid="video-bar">
         <div className="video-bar-container">
           <div className="flex items-center justify-between px-6 mb-2">
             <h3 className="text-sm font-semibold flex items-center gap-2">
               <Play size={14} className="text-red-500" />
-              UFO & Mystery Videos
+              Live Media Feed - UAP/UFO Disclosure News
             </h3>
             <button 
               className="video-refresh-btn"
-              onClick={shuffleVideos}
-              data-testid="refresh-videos-btn"
-              title="Shuffle videos"
+              onClick={refreshLiveFeed}
+              disabled={liveFeedLoading}
+              data-testid="refresh-live-feed-btn"
+              title="Refresh live feed"
             >
-              <RefreshCw size={14} />
-              <span className="text-xs ml-1">Shuffle</span>
+              <RefreshCw size={14} className={liveFeedLoading ? 'animate-spin' : ''} />
+              <span className="text-xs ml-1">Refresh</span>
             </button>
           </div>
           <div className="video-scroll hide-scrollbar">
-            {videosLoading ? (
+            {liveFeedLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="animate-spin text-cyan-400 mr-2" size={20} />
-                <span className="text-sm text-gray-400">Loading videos...</span>
+                <span className="text-sm text-gray-400">Loading disclosure news...</span>
               </div>
-            ) : videosError ? (
+            ) : liveFeedError ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <AlertTriangle className="text-red-400 mb-2" size={20} />
-                <span className="text-sm text-red-400">{videosError}</span>
+                <span className="text-sm text-red-400">{liveFeedError}</span>
                 <button 
-                  onClick={fetchVideos}
+                  onClick={refreshLiveFeed}
                   className="mt-2 text-xs text-cyan-400 hover:text-cyan-300"
                 >
                   Retry
                 </button>
               </div>
-            ) : videos.length === 0 ? (
+            ) : liveFeedVideos.length === 0 ? (
               <div className="flex items-center justify-center py-8">
-                <span className="text-sm text-gray-400">No videos found</span>
+                <span className="text-sm text-gray-400">No disclosure news videos found</span>
               </div>
             ) : (
-              videos.map((video, idx) => (
+              liveFeedVideos.map((video, idx) => (
                 <div
                   key={video.video_id || idx}
                   onClick={() => setPlayingVideo(video)}
                   className="video-card"
-                  data-testid={`video-card-${idx}`}
+                  data-testid={`live-feed-video-${idx}`}
                 >
                   {video.sirius && <span className="sirius-badge">SIRIUS</span>}
                   <img 

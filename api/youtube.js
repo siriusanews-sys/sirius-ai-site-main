@@ -50,7 +50,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { maxResults = 12 } = req.query;
+  const { maxResults = 12, searchQuery = 'UFO UAP news' } = req.query;
   let videos = [];
 
   // Strategy 1: Try YouTube Data API if key is available
@@ -59,7 +59,7 @@ module.exports = async function handler(req, res) {
     try {
       console.log('[YOUTUBE] Trying YouTube Data API v3...');
       const publishedAfter = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=UFO%20UAP%20news&type=video&maxResults=${maxResults}&order=relevance&publishedAfter=${publishedAfter}&key=${apiKey}`;
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchQuery)}&type=video&maxResults=${maxResults}&order=relevance&publishedAfter=${publishedAfter}&key=${apiKey}`;
       
       const response = await fetch(url, { timeout: 8000 });
       
@@ -75,7 +75,7 @@ module.exports = async function handler(req, res) {
             thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
             sirius: item.snippet.channelTitle.toLowerCase().includes('sirius')
           }));
-          console.log('[YOUTUBE] YouTube API returned', videos.length, 'videos');
+          console.log('[YOUTUBE] YouTube API returned', videos.length, 'videos for query:', searchQuery);
         }
       }
     } catch (apiError) {
@@ -89,7 +89,7 @@ module.exports = async function handler(req, res) {
   if (videos.length === 0) {
     try {
       console.log('[YOUTUBE] Trying RSS feed...');
-      const rssUrl = encodeURIComponent('https://www.youtube.com/feeds/videos.xml?search_query=UFO+UAP+news');
+      const rssUrl = encodeURIComponent(`https://www.youtube.com/feeds/videos.xml?search_query=${searchQuery.replace(/\s+/g, '+')}`);
       const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}&count=${maxResults}`, { timeout: 5000 });
       
       if (response.ok) {
