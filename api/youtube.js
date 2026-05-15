@@ -73,6 +73,7 @@ module.exports = async function handler(req, res) {
             description: item.snippet.description?.substring(0, 200) || '',
             publishedAt: item.snippet.publishedAt,
             thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
+            snippet: item.snippet,
             sirius: item.snippet.channelTitle.toLowerCase().includes('sirius')
           }));
           console.log('[YOUTUBE] YouTube API returned', videos.length, 'videos for query:', searchQuery);

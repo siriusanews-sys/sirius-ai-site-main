@@ -1309,7 +1309,7 @@ function App() {
                   <div className="video-thumbnail-wrapper w-full h-32 rounded overflow-hidden bg-slate-900 flex items-center justify-center">
                     {!thumbnailLoadFailed[video.video_id] ? (
                       <img
-                        src={`https://img.youtube.com/vi/${video.video_id}/hqdefault.jpg`}
+                        src={video.snippet?.thumbnails?.high?.url || video.snippet?.thumbnails?.medium?.url || video.thumbnail || `https://img.youtube.com/vi/${video.video_id}/hqdefault.jpg`}
                         alt={video.title}
                         className="w-full h-full object-cover"
                         crossOrigin="anonymous"
