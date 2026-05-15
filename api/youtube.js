@@ -19,6 +19,8 @@ const VIDEO_POOL = [
   description: "UFO/UAP related video"
 }));
 
+const axios = require('axios');
+
 // Shuffle helper
 const shuffleArray = (arr) => {
   const a = [...arr];
@@ -59,32 +61,26 @@ module.exports = async function handler(req, res) {
   const query = searchQuery || searchQueries[Math.floor(Math.random() * searchQueries.length)];
   let videos = [];
 
-  // Fetch from YouTube public RSS search feed to avoid API key restrictions
+  // Fetch clean JSON via rss2json proxy to avoid XML parsing and API key requirements
   try {
-    console.log('[YOUTUBE] Fetching public RSS search feed for query:', query);
+    console.log('[YOUTUBE] Fetching rss2json JSON feed for query:', query);
     const rssUrl = `https://www.youtube.com/feeds/videos.xml?search_query=${encodeURIComponent(query)}`;
-    const response = await fetch(rssUrl, { timeout: 8000 });
+    const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=${maxResults}`;
+    const response = await axios.get(proxyUrl, { timeout: 10000 });
 
-    if (response.ok) {
-      const text = await response.text();
-      const entries = Array.from(text.matchAll(/<entry>([\s\S]*?)<\/entry>/g));
-      videos = entries.slice(0, maxResults).map(entryMatch => {
-        const entry = entryMatch[1];
-        const videoId = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] || null;
-        const title = entry.match(/<title>([^<]+)<\/title>/)?.[1] || 'Untitled video';
-        const channel = entry.match(/<author>\s*<name>([^<]+)<\/name>/)?.[1] || 'YouTube';
-        const description = entry.match(/<media:description[^>]*>([\s\S]*?)<\/media:description>/)?.[1]?.trim() || '';
-        const publishedAt = entry.match(/<published>([^<]+)<\/published>/)?.[1] || '';
+    if (response.data?.status === 'ok' && Array.isArray(response.data.items)) {
+      videos = response.data.items.slice(0, maxResults).map(item => {
+        const videoId = item.link?.match(/[?&]v=([^&]+)/)?.[1] || item.guid?.match(/([^/]+)$/)?.[1] || null;
+        const thumbnailUrl = item.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
 
         if (!videoId) return null;
-        const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
         return {
           video_id: videoId,
-          title,
-          channel,
-          description: description.substring(0, 200),
-          publishedAt,
+          title: item.title || 'Untitled video',
+          channel: item.author || 'YouTube',
+          description: (item.description || '').substring(0, 200),
+          publishedAt: item.pubDate || item.date || new Date().toISOString(),
           thumbnail: thumbnailUrl,
           snippet: {
             thumbnails: {
@@ -95,12 +91,12 @@ module.exports = async function handler(req, res) {
           sirius: false
         };
       }).filter(Boolean);
-      console.log('[YOUTUBE] RSS feed returned', videos.length, 'videos for query:', query);
+      console.log('[YOUTUBE] rss2json returned', videos.length, 'videos for query:', query);
     } else {
-      console.log('[YOUTUBE] RSS feed fetch failed:', response.status);
+      console.log('[YOUTUBE] rss2json proxy returned invalid data', response.data?.status);
     }
-  } catch (rssError) {
-    console.log('[YOUTUBE] RSS feed failed:', rssError.message);
+  } catch (proxyError) {
+    console.log('[YOUTUBE] rss2json proxy failed:', proxyError.message);
   }
 
   // Strategy 3: Static fallback (always works)
