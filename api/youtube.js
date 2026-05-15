@@ -50,71 +50,57 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { maxResults = 12, searchQuery = 'Pentagon UAP files 2026', order = 'date' } = req.query;
+  const { maxResults = 12, searchQuery = '' } = req.query;
+  const searchQueries = [
+    'Pentagon UAP files 2026',
+    'AARO latest UFO disclosure',
+    'US Congress UFO hearing news'
+  ];
+  const query = searchQuery || searchQueries[Math.floor(Math.random() * searchQueries.length)];
   let videos = [];
 
-  // Strategy 1: Try YouTube Data API if key is available
-  const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
-  if (apiKey) {
-    try {
-      console.log('[YOUTUBE] Trying YouTube Data API v3...');
-      const publishedAfter = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchQuery)}&type=video&maxResults=${maxResults}&order=${order}&publishedAfter=${publishedAfter}&key=${apiKey}`;
-      
-      const response = await fetch(url, { timeout: 8000 });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.items && data.items.length > 0) {
-          videos = data.items.map(item => ({
-            video_id: item.id.videoId,
-            title: item.snippet.title,
-            channel: item.snippet.channelTitle,
-            description: item.snippet.description?.substring(0, 200) || '',
-            publishedAt: item.snippet.publishedAt,
-            thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
-            snippet: item.snippet,
-            sirius: item.snippet.channelTitle.toLowerCase().includes('sirius')
-          }));
-          console.log('[YOUTUBE] YouTube API returned', videos.length, 'videos for query:', searchQuery);
-        }
-      }
-    } catch (apiError) {
-      console.log('[YOUTUBE] YouTube API failed:', apiError.message);
-    }
-  } else {
-    console.log('[YOUTUBE] No YouTube API key found, skipping API attempt');
-  }
+  // Fetch from YouTube public RSS search feed to avoid API key restrictions
+  try {
+    console.log('[YOUTUBE] Fetching public RSS search feed for query:', query);
+    const rssUrl = `https://www.youtube.com/feeds/videos.xml?search_query=${encodeURIComponent(query)}`;
+    const response = await fetch(rssUrl, { timeout: 8000 });
 
-  // Strategy 2: Try RSS if API failed or no key
-  if (videos.length === 0) {
-    try {
-      console.log('[YOUTUBE] Trying RSS feed...');
-      const rssUrl = encodeURIComponent(`https://www.youtube.com/feeds/videos.xml?search_query=${searchQuery.replace(/\s+/g, '+')}`);
-      const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}&count=${maxResults}`, { timeout: 5000 });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.items && data.items.length > 0) {
-          videos = data.items.map(item => {
-            const match = item.link.match(/v=([^&]+)/);
-            const videoId = match ? match[1] : null;
-            return videoId ? {
-              video_id: videoId,
-              title: item.title,
-              channel: item.author || 'YouTube',
-              description: item.description?.substring(0, 200) || '',
-              publishedAt: item.pubDate,
-              thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-              sirius: item.author?.toLowerCase().includes('sirius') || false
-            } : null;
-          }).filter(Boolean);
-          console.log('[YOUTUBE] RSS returned', videos.length, 'videos');
-        }
-      }
-    } catch (rssError) {
-      console.log('[YOUTUBE] RSS failed:', rssError.message);
+    if (response.ok) {
+      const text = await response.text();
+      const entries = Array.from(text.matchAll(/<entry>([\s\S]*?)<\/entry>/g));
+      videos = entries.slice(0, maxResults).map(entryMatch => {
+        const entry = entryMatch[1];
+        const videoId = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] || null;
+        const title = entry.match(/<title>([^<]+)<\/title>/)?.[1] || 'Untitled video';
+        const channel = entry.match(/<author>\s*<name>([^<]+)<\/name>/)?.[1] || 'YouTube';
+        const description = entry.match(/<media:description[^>]*>([\s\S]*?)<\/media:description>/)?.[1]?.trim() || '';
+        const publishedAt = entry.match(/<published>([^<]+)<\/published>/)?.[1] || '';
+
+        if (!videoId) return null;
+        const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+
+        return {
+          video_id: videoId,
+          title,
+          channel,
+          description: description.substring(0, 200),
+          publishedAt,
+          thumbnail: thumbnailUrl,
+          snippet: {
+            thumbnails: {
+              high: { url: thumbnailUrl },
+              medium: { url: thumbnailUrl }
+            }
+          },
+          sirius: false
+        };
+      }).filter(Boolean);
+      console.log('[YOUTUBE] RSS feed returned', videos.length, 'videos for query:', query);
+    } else {
+      console.log('[YOUTUBE] RSS feed fetch failed:', response.status);
     }
+  } catch (rssError) {
+    console.log('[YOUTUBE] RSS feed failed:', rssError.message);
   }
 
   // Strategy 3: Static fallback (always works)

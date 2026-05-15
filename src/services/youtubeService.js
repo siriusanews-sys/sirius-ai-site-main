@@ -35,7 +35,7 @@ export const fetchDisclosureNewsVideos = async (maxResults = 12) => {
   
   // Randomly pick one of the latest search queries for fresh live coverage
   const selectedQuery = searchQueries[Math.floor(Math.random() * searchQueries.length)];
-  const apiUrl = `${baseUrl}/api/youtube?maxResults=${maxResults}&searchQuery=${encodeURIComponent(selectedQuery)}&order=date`;
+  const apiUrl = `${baseUrl}/api/youtube?maxResults=${maxResults}&searchQuery=${encodeURIComponent(selectedQuery)}`;
   
   try {
     const res = await axios.get(apiUrl);
