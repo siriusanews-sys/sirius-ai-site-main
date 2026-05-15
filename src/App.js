@@ -364,7 +364,7 @@ function App() {
       await Promise.all(queries.map(async ({ q, gl, hl }) => {
         try {
           const rssUrl = encodeURIComponent(`https://news.google.com/rss/search?q=${q}&hl=${hl}-${gl}&gl=${gl}&ceid=${gl}:${hl}`);
-          const res = await axios.get(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}&count=10`, { timeout: 8000 });
+          const res = await axios.get(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}&count=10`, { timeout: 15000 });
           if (res.data?.items) {
             allItems.push(...res.data.items);
           }
@@ -823,7 +823,7 @@ function App() {
         bounds="window"
         dragHandleClassName="chat-drag-handle"
         className="chat-rnd"
-        style={{ position: 'fixed', bottom: '220px', zIndex: 1000 }}
+        style={{ position: 'fixed', bottom: '240px', zIndex: 1000 }}
       >
       <div className="glass-panel chat-panel-rnd fade-in">
         <div className="list-header chat-drag-handle flex items-center justify-between" style={{ cursor: 'move' }}>

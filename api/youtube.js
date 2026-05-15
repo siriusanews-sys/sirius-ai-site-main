@@ -74,7 +74,7 @@ export default async function handler(req, res) {
       console.log('[YOUTUBE] Using YouTube Data API v3 for channel:', selectedChannel);
       const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${selectedChannel}&type=video&maxResults=${maxResults}&order=date&key=${apiKey}`;
       const ytResponse = await axios.get(ytUrl, {
-        timeout: 10000,
+        timeout: 15000,
         headers: {
           'Cache-Control': 'no-cache',
           Pragma: 'no-cache'
@@ -107,7 +107,7 @@ export default async function handler(req, res) {
       const rssUrl = `https://www.youtube.com/feeds/videos.xml?search_query=${encodeURIComponent(query)}`;
       const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}&_=${Date.now()}`;
       const response = await axios.get(proxyUrl, {
-        timeout: 10000,
+        timeout: 15000,
         headers: {
           'Cache-Control': 'no-cache',
           Pragma: 'no-cache'

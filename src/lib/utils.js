@@ -51,7 +51,7 @@ export async function geocodeLocation(locationString) {
   try {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationString)}&format=json&limit=1`,
-      { timeout: 5000 }
+      { timeout: 15000 }
     );
     
     if (response.ok) {
