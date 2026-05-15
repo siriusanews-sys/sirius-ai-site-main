@@ -26,16 +26,16 @@ export const fetchUFOVideos = async (maxResults = 12) => {
 export const fetchDisclosureNewsVideos = async (maxResults = 12) => {
   const baseUrl = window.location.origin;
   
-  // Verified search queries for official disclosure and credible news sources
+  // Verified search queries for the latest disclosure news
   const searchQueries = [
-    'US government declassified UFO footage',
-    'AARO UAP official videos',
-    'Pentagon UFO disclosure'
+    'Pentagon UAP files 2026',
+    'AARO latest UFO disclosure',
+    'US Congress UFO hearing news'
   ];
   
-  // Randomly pick one of the search queries for variety
+  // Randomly pick one of the latest search queries for fresh live coverage
   const selectedQuery = searchQueries[Math.floor(Math.random() * searchQueries.length)];
-  const apiUrl = `${baseUrl}/api/youtube?maxResults=${maxResults}&searchQuery=${encodeURIComponent(selectedQuery)}`;
+  const apiUrl = `${baseUrl}/api/youtube?maxResults=${maxResults}&searchQuery=${encodeURIComponent(selectedQuery)}&order=date`;
   
   try {
     const res = await axios.get(apiUrl);

@@ -50,7 +50,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { maxResults = 12, searchQuery = 'UFO UAP news' } = req.query;
+  const { maxResults = 12, searchQuery = 'Pentagon UAP files 2026', order = 'date' } = req.query;
   let videos = [];
 
   // Strategy 1: Try YouTube Data API if key is available
@@ -59,7 +59,7 @@ module.exports = async function handler(req, res) {
     try {
       console.log('[YOUTUBE] Trying YouTube Data API v3...');
       const publishedAfter = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchQuery)}&type=video&maxResults=${maxResults}&order=relevance&publishedAfter=${publishedAfter}&key=${apiKey}`;
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchQuery)}&type=video&maxResults=${maxResults}&order=${order}&publishedAfter=${publishedAfter}&key=${apiKey}`;
       
       const response = await fetch(url, { timeout: 8000 });
       
