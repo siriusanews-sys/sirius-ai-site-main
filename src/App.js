@@ -1288,17 +1288,15 @@ function App() {
           >
             {liveFeedVideos.map((video, idx) => {
               const videoId = video.video_id || video.id || video.link?.match(/[?&]v=([^&]+)/)?.[1] || '';
-              const videoLink = videoId ? `https://www.youtube.com/watch?v=${videoId}` : video.link || '#';
               const thumbnail = video.snippet?.thumbnails?.medium?.url || video.snippet?.thumbnails?.high?.url || video.thumbnail || `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
               return (
-                <a
+                <button
                   key={video.video_id || idx}
-                  href={videoLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  type="button"
+                  onClick={() => setPlayingVideo(video)}
                   className="video-card group inline-flex shrink-0 flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-xl shadow-black/20 transition-transform hover:-translate-y-0.5 hover:border-cyan-500"
-                  style={{ minWidth: '280px', maxWidth: '320px' }}
+                  style={{ minWidth: '280px', maxWidth: '320px', marginRight: '12px' }}
                   data-testid={`live-feed-video-${idx}`}
                 >
                   <div className="video-thumbnail-wrapper h-28 overflow-hidden bg-slate-900">
@@ -1311,11 +1309,11 @@ function App() {
                       onError={() => handleThumbnailError(video.video_id)}
                     />
                   </div>
-                  <div className="px-3 py-3">
+                  <div className="px-3 py-3 text-left">
                     <p className="text-sm font-semibold text-gray-100 line-clamp-2">{video.title || 'Live disclosure video'}</p>
                     <p className="text-xs text-gray-500 mt-1">{video.channel || 'YouTube'}</p>
                   </div>
-                </a>
+                </button>
               );
             })}
           </div>

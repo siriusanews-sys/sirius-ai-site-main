@@ -53,40 +53,41 @@ module.exports = async function handler(req, res) {
   }
 
   const { maxResults = 12, searchQuery = '' } = req.query;
-  const searchQueries = [
-    'Pentagon UAP files 2026',
-    'AARO latest UFO disclosure',
-    'US Congress UFO hearing news'
-  ];
-  const query = searchQuery || searchQueries[Math.floor(Math.random() * searchQueries.length)];
+  const query = searchQuery || 'Pentagon UFO 2026';
   let videos = [];
 
-  // Fetch clean JSON via rss2json proxy to avoid XML parsing and API key requirements
+  // Fetch live YouTube search XML through an unblocked public proxy and parse it directly
   try {
-    console.log('[YOUTUBE] Fetching rss2json JSON feed for query:', query);
+    console.log('[YOUTUBE] Fetching live search XML feed for query:', query);
     const rssUrl = `https://www.youtube.com/feeds/videos.xml?search_query=${encodeURIComponent(query)}`;
-    const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=${maxResults}&_=${Date.now()}`;
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}&_=${Date.now()}`;
     const response = await axios.get(proxyUrl, {
-      timeout: 10000,
+      timeout: 12000,
       headers: {
         'Cache-Control': 'no-cache',
         Pragma: 'no-cache'
       }
     });
 
-    if (response.data?.status === 'ok' && Array.isArray(response.data.items)) {
-      videos = response.data.items.slice(0, maxResults).map(item => {
-        const videoId = item.link?.match(/[?&]v=([^&]+)/)?.[1] || item.guid?.match(/([^/]+)$/)?.[1] || null;
-        const thumbnailUrl = item.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
+    if (typeof response.data === 'string') {
+      const entries = Array.from(response.data.matchAll(/<entry>([\s\S]*?)<\/entry>/g));
+      videos = entries.slice(0, maxResults).map(entryMatch => {
+        const entry = entryMatch[1];
+        const videoId = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] || null;
+        const title = entry.match(/<title>([^<]+)<\/title>/)?.[1] || 'Untitled video';
+        const channel = entry.match(/<author>\s*<name>([^<]+)<\/name>/)?.[1] || 'YouTube';
+        const description = entry.match(/<media:description[^>]*>([\s\S]*?)<\/media:description>/)?.[1]?.trim() || '';
+        const publishedAt = entry.match(/<published>([^<]+)<\/published>/)?.[1] || '';
+        const thumbnailUrl = entry.match(/<media:thumbnail[^>]*url="([^\"]+)"/)?.[1] || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
 
         if (!videoId) return null;
 
         return {
           video_id: videoId,
-          title: item.title || 'Untitled video',
-          channel: item.author || 'YouTube',
-          description: (item.description || '').substring(0, 200),
-          publishedAt: item.pubDate || item.date || new Date().toISOString(),
+          title,
+          channel,
+          description: description.substring(0, 200),
+          publishedAt,
           thumbnail: thumbnailUrl,
           snippet: {
             thumbnails: {
@@ -97,12 +98,12 @@ module.exports = async function handler(req, res) {
           sirius: false
         };
       }).filter(Boolean);
-      console.log('[YOUTUBE] rss2json returned', videos.length, 'videos for query:', query);
+      console.log('[YOUTUBE] XML search feed returned', videos.length, 'videos for query:', query);
     } else {
-      console.log('[YOUTUBE] rss2json proxy returned invalid data', response.data?.status);
+      console.log('[YOUTUBE] Unexpected RSS response format');
     }
   } catch (proxyError) {
-    console.log('[YOUTUBE] rss2json proxy failed:', proxyError.message);
+    console.log('[YOUTUBE] XML search proxy failed:', proxyError.message);
   }
 
   // Strategy 3: Static fallback (always works)
