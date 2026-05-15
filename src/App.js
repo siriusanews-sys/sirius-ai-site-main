@@ -32,6 +32,7 @@ import { ScrollArea } from "./components/ui/scroll-area";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { fetchUFOVideos } from "./services/youtubeService";
+import { geocodeLocation } from "./lib/utils";
 
 // Using Vercel serverless functions at /api/* - no external backend needed
 const API = '/api';
@@ -527,16 +528,45 @@ function App() {
   const handleSubmitReport = async (e) => {
     e.preventDefault();
     
-    if (!reportForm.title || !reportForm.location || !reportForm.latitude || !reportForm.longitude) {
-      toast.error("Please fill in all required fields");
+    // Only title and location are required
+    if (!reportForm.title || !reportForm.location) {
+      toast.error("Please fill in Title and Location");
       return;
+    }
+
+    let latitude = parseFloat(reportForm.latitude);
+    let longitude = parseFloat(reportForm.longitude);
+    
+    // If latitude/longitude are missing, try to geocode from location
+    if ((isNaN(latitude) || isNaN(longitude)) && reportForm.location) {
+      try {
+        toast.loading("Geocoding location...");
+        const coords = await geocodeLocation(reportForm.location);
+        if (coords) {
+          latitude = coords.latitude;
+          longitude = coords.longitude;
+          toast.dismiss();
+        } else {
+          toast.dismiss();
+          toast.warning("Could not determine coordinates for location. Using defaults.");
+          // Use default safe coordinates if geocoding fails
+          latitude = 0;
+          longitude = 0;
+        }
+      } catch (error) {
+        console.error('[Geocoding] Error:', error);
+        toast.dismiss();
+        toast.warning("Could not determine coordinates. Using defaults.");
+        latitude = 0;
+        longitude = 0;
+      }
     }
 
     const newSighting = {
       id: `user-${Date.now()}`,
       ...reportForm,
-      latitude: parseFloat(reportForm.latitude),
-      longitude: parseFloat(reportForm.longitude),
+      latitude: latitude || 0,
+      longitude: longitude || 0,
       reported_by: "Anonymous User",
       is_user_reported: true
     };
@@ -561,13 +591,16 @@ function App() {
       type: "ufo"
     });
     setShowReportForm(false);
-    toast.success("Sighting reported successfully!");
+    toast.success("Sighting submitted successfully!");
 
-    setHighlightedLocation({
-      latitude: parseFloat(reportForm.latitude),
-      longitude: parseFloat(reportForm.longitude),
-      title: reportForm.title
-    });
+    // Highlight the location on the globe if coordinates are valid
+    if (latitude !== 0 || longitude !== 0) {
+      setHighlightedLocation({
+        latitude: latitude,
+        longitude: longitude,
+        title: reportForm.title
+      });
+    }
   };
 
   // Prepare globe data
@@ -815,25 +848,25 @@ function App() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="form-group">
-                <label className="form-label">Latitude *</label>
+                <label className="form-label">Latitude (Optional)</label>
                 <Input
                   data-testid="report-latitude-input"
                   className="form-input"
                   type="number"
                   step="any"
-                  placeholder="51.5074"
+                  placeholder="Auto-detect from location"
                   value={reportForm.latitude}
                   onChange={(e) => setReportForm(prev => ({ ...prev, latitude: e.target.value }))}
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Longitude *</label>
+                <label className="form-label">Longitude (Optional)</label>
                 <Input
                   data-testid="report-longitude-input"
                   className="form-input"
                   type="number"
                   step="any"
-                  placeholder="-0.1278"
+                  placeholder="Auto-detect from location"
                   value={reportForm.longitude}
                   onChange={(e) => setReportForm(prev => ({ ...prev, longitude: e.target.value }))}
                 />
