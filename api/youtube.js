@@ -19,7 +19,7 @@ const VIDEO_POOL = [
   description: "UFO/UAP related video"
 }));
 
-const axios = require('axios');
+import axios from 'axios';
 
 // Shuffle helper
 const shuffleArray = (arr) => {
@@ -38,7 +38,7 @@ const buildVideoList = () => {
   return [sirius, ...others.slice(0, 11)];
 };
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   console.log(`[YOUTUBE] ${req.method} request received from ${req.headers['x-forwarded-for'] || req.socket.remoteAddress}`);
   
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -56,54 +56,88 @@ module.exports = async function handler(req, res) {
   const query = searchQuery || 'Pentagon UFO 2026';
   let videos = [];
 
-  // Fetch live YouTube search XML through an unblocked public proxy and parse it directly
-  try {
-    console.log('[YOUTUBE] Fetching live search XML feed for query:', query);
-    const rssUrl = `https://www.youtube.com/feeds/videos.xml?search_query=${encodeURIComponent(query)}`;
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}&_=${Date.now()}`;
-    const response = await axios.get(proxyUrl, {
-      timeout: 12000,
-      headers: {
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache'
+  // Strategy 1: Official YouTube Data API using the active API key and order=date
+  const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
+  if (apiKey) {
+    try {
+      console.log('[YOUTUBE] Using YouTube Data API v3 for query:', query);
+      const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=${maxResults}&order=date&key=${apiKey}`;
+      const ytResponse = await axios.get(ytUrl, {
+        timeout: 12000,
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache'
+        }
+      });
+
+      if (Array.isArray(ytResponse.data?.items) && ytResponse.data.items.length > 0) {
+        videos = ytResponse.data.items.map(item => ({
+          video_id: item.id.videoId,
+          title: item.snippet.title,
+          channel: item.snippet.channelTitle,
+          description: item.snippet.description?.substring(0, 200) || '',
+          publishedAt: item.snippet.publishedAt,
+          thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url || `https://img.youtube.com/vi/${item.id.videoId}/mqdefault.jpg`,
+          snippet: item.snippet,
+          sirius: item.snippet.channelTitle?.toLowerCase().includes('sirius') || false
+        }));
+        console.log('[YOUTUBE] YouTube Data API returned', videos.length, 'videos');
       }
-    });
-
-    if (typeof response.data === 'string') {
-      const entries = Array.from(response.data.matchAll(/<entry>([\s\S]*?)<\/entry>/g));
-      videos = entries.slice(0, maxResults).map(entryMatch => {
-        const entry = entryMatch[1];
-        const videoId = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] || null;
-        const title = entry.match(/<title>([^<]+)<\/title>/)?.[1] || 'Untitled video';
-        const channel = entry.match(/<author>\s*<name>([^<]+)<\/name>/)?.[1] || 'YouTube';
-        const description = entry.match(/<media:description[^>]*>([\s\S]*?)<\/media:description>/)?.[1]?.trim() || '';
-        const publishedAt = entry.match(/<published>([^<]+)<\/published>/)?.[1] || '';
-        const thumbnailUrl = entry.match(/<media:thumbnail[^>]*url="([^\"]+)"/)?.[1] || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
-
-        if (!videoId) return null;
-
-        return {
-          video_id: videoId,
-          title,
-          channel,
-          description: description.substring(0, 200),
-          publishedAt,
-          thumbnail: thumbnailUrl,
-          snippet: {
-            thumbnails: {
-              high: { url: thumbnailUrl },
-              medium: { url: thumbnailUrl }
-            }
-          },
-          sirius: false
-        };
-      }).filter(Boolean);
-      console.log('[YOUTUBE] XML search feed returned', videos.length, 'videos for query:', query);
-    } else {
-      console.log('[YOUTUBE] Unexpected RSS response format');
+    } catch (apiError) {
+      console.log('[YOUTUBE] YouTube Data API failed:', apiError.message);
     }
-  } catch (proxyError) {
-    console.log('[YOUTUBE] XML search proxy failed:', proxyError.message);
+  }
+
+  // Strategy 2: XML fallback from an unblocked global disclosure search feed
+  if (videos.length === 0) {
+    try {
+      console.log('[YOUTUBE] Falling back to live XML search feed for query:', query);
+      const rssUrl = `https://www.youtube.com/feeds/videos.xml?search_query=${encodeURIComponent(query)}`;
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}&_=${Date.now()}`;
+      const response = await axios.get(proxyUrl, {
+        timeout: 12000,
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache'
+        }
+      });
+
+      if (typeof response.data === 'string') {
+        const entries = Array.from(response.data.matchAll(/<entry>([\s\S]*?)<\/entry>/g));
+        videos = entries.slice(0, maxResults).map(entryMatch => {
+          const entry = entryMatch[1];
+          const videoId = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] || null;
+          const title = entry.match(/<title>([^<]+)<\/title>/)?.[1] || 'Untitled video';
+          const channel = entry.match(/<author>\s*<name>([^<]+)<\/name>/)?.[1] || 'YouTube';
+          const description = entry.match(/<media:description[^>]*>([\s\S]*?)<\/media:description>/)?.[1]?.trim() || '';
+          const publishedAt = entry.match(/<published>([^<]+)<\/published>/)?.[1] || '';
+          const thumbnailUrl = entry.match(/<media:thumbnail[^>]*url="([^\"]+)"/)?.[1] || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
+
+          if (!videoId) return null;
+
+          return {
+            video_id: videoId,
+            title,
+            channel,
+            description: description.substring(0, 200),
+            publishedAt,
+            thumbnail: thumbnailUrl,
+            snippet: {
+              thumbnails: {
+                high: { url: thumbnailUrl },
+                medium: { url: thumbnailUrl }
+              }
+            },
+            sirius: false
+          };
+        }).filter(Boolean);
+        console.log('[YOUTUBE] XML search feed returned', videos.length, 'videos');
+      } else {
+        console.log('[YOUTUBE] Unexpected RSS response format');
+      }
+    } catch (proxyError) {
+      console.log('[YOUTUBE] XML search proxy failed:', proxyError.message);
+    }
   }
 
   // Strategy 3: Static fallback (always works)
