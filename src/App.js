@@ -1277,56 +1277,18 @@ function App() {
             </button>
           </div>
           <div className="video-scroll hide-scrollbar">
-            {liveFeedLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="animate-spin text-cyan-400 mr-2" size={20} />
-                <span className="text-sm text-gray-400">Loading disclosure news...</span>
-              </div>
-            ) : liveFeedError ? (
-              <div className="flex flex-col items-center justify-center py-8">
-                <AlertTriangle className="text-red-400 mb-2" size={20} />
-                <span className="text-sm text-red-400">{liveFeedError}</span>
-                <button 
-                  onClick={refreshLiveFeed}
-                  className="mt-2 text-xs text-cyan-400 hover:text-cyan-300"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : liveFeedVideos.length === 0 ? (
-              <div className="flex items-center justify-center py-8">
-                <span className="text-sm text-gray-400">No disclosure news videos found</span>
-              </div>
-            ) : (
-              liveFeedVideos.map((video, idx) => (
-                <div
-                  key={video.video_id || idx}
-                  onClick={() => setPlayingVideo(video)}
-                  className="video-card"
-                  data-testid={`live-feed-video-${idx}`}
-                >
-                  {video.sirius && <span className="sirius-badge">SIRIUS</span>}
-                  <div className="video-thumbnail-wrapper w-full h-32 rounded overflow-hidden bg-slate-900 flex items-center justify-center">
-                    {!thumbnailLoadFailed[video.video_id] ? (
-                      <img
-                        src={video.snippet?.thumbnails?.high?.url || video.snippet?.thumbnails?.medium?.url || video.thumbnail || `https://img.youtube.com/vi/${video.video_id}/hqdefault.jpg`}
-                        alt={video.title}
-                        className="w-full h-full object-cover"
-                        crossOrigin="anonymous"
-                        referrerPolicy="no-referrer"
-                        onError={() => handleThumbnailError(video.video_id)}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-slate-950 flex items-center justify-center text-white">
-                        <Play size={32} />
-                      </div>
-                    )}
-                  </div>
-                  <p className="video-title text-gray-300">{video.title}</p>
-                  <p className="text-xs text-gray-500">{video.channel}</p>
-                </div>
-              ))
-            )}
+            <div className="video-embed-wrapper w-full rounded-3xl overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl shadow-black/40" style={{ minHeight: '450px' }}>
+              <iframe
+                src="https://youtube.com"
+                title="UAP Disclosure Live Feed"
+                width="100%"
+                height="100%"
+                className="min-h-[450px] w-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
           </div>
         </div>
       </div>
