@@ -495,7 +495,24 @@ function App() {
         throw new Error(data.error);
       }
       
-      setChatMessages(prev => [...prev, { role: 'assistant', content: data.reply || data.response }]);
+      // Add the AI response to chat
+      setChatMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+      
+      // If YouTube trigger detected, automatically fetch and display videos
+      if (data.trigger_youtube) {
+        try {
+          const youtubeVideos = await fetchUFOVideos(12);
+          // Add videos as a system message with special marker
+          setChatMessages(prev => [...prev, { 
+            role: 'system', 
+            content: 'VIDEOS_TRIGGERED', 
+            videos: youtubeVideos 
+          }]);
+        } catch (videoError) {
+          console.error('[Frontend] YouTube auto-fetch error:', videoError);
+          // Silently fail - don't disrupt the chat
+        }
+      }
     } catch (error) {
       console.error('[Frontend] Sirius axios error:', error);
       setChatMessages(prev => [...prev, { role: 'assistant', content: "Signal lost... " + (error.response?.data?.error || error.message) }]);
@@ -866,12 +883,34 @@ function App() {
                   className={`chat-message ${msg.role}`}
                   data-testid={`chat-message-${msg.role}-${idx}`}
                 >
-                  <p className="text-sm">{msg.content}</p>
-                  {msg.location && (
-                    <div className="flex items-center gap-1 mt-2 text-xs text-yellow-400">
-                      <MapPin size={12} />
-                      <span>{msg.location.location}</span>
+                  {msg.role === 'system' && msg.content === 'VIDEOS_TRIGGERED' ? (
+                    <div className="video-grid mt-2">
+                      {msg.videos && msg.videos.slice(0, 4).map((video, vidIdx) => (
+                        <div 
+                          key={vidIdx} 
+                          className="video-card cursor-pointer hover:scale-105 transition-transform"
+                          onClick={() => setPlayingVideo(video)}
+                        >
+                          <img 
+                            src={video.thumbnail} 
+                            alt={video.title}
+                            className="w-full h-24 object-cover rounded"
+                            onError={(e) => e.target.src = `https://img.youtube.com/vi/${video.video_id}/mqdefault.jpg`}
+                          />
+                          <p className="text-xs mt-1 line-clamp-2">{video.title}</p>
+                        </div>
+                      ))}
                     </div>
+                  ) : (
+                    <>
+                      <p className="text-sm">{msg.content}</p>
+                      {msg.location && (
+                        <div className="flex items-center gap-1 mt-2 text-xs text-yellow-400">
+                          <MapPin size={12} />
+                          <span>{msg.location.location}</span>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               ))}
