@@ -325,7 +325,7 @@ function App() {
   const [highlightedLocation, setHighlightedLocation] = useState(null);
   const [showReportForm, setShowReportForm] = useState(false);
   const [playingVideo, setPlayingVideo] = useState(null);
-  const activeVideoEmbedPath = playingVideo ? `/embed/${playingVideo.videoId || playingVideo.video_id || playingVideo.id}` : '';
+  const activeVideoEmbedSrc = playingVideo ? `https://www.youtube.com/embed/${playingVideo.videoId || playingVideo.id}?autoplay=1` : '';
   const [showPayPalModal, setShowPayPalModal] = useState(false);
   const [newsItems, setNewsItems] = useState([]);
   const [readerArticle, setReaderArticle] = useState(null);
@@ -1522,7 +1522,7 @@ function App() {
             </div>
             <div className="video-iframe-container">
               <iframe
-                src={`https://youtube.com${activeVideoEmbedPath}?autoplay=1`}
+                src={activeVideoEmbedSrc}
                 title={playingVideo.title}
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
