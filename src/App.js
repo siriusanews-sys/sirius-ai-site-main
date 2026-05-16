@@ -325,6 +325,7 @@ function App() {
   const [highlightedLocation, setHighlightedLocation] = useState(null);
   const [showReportForm, setShowReportForm] = useState(false);
   const [playingVideo, setPlayingVideo] = useState(null);
+  const activeVideoEmbedPath = playingVideo ? `/embed/${playingVideo.videoId || playingVideo.video_id || playingVideo.id}` : '';
   const [showPayPalModal, setShowPayPalModal] = useState(false);
   const [newsItems, setNewsItems] = useState([]);
   const [readerArticle, setReaderArticle] = useState(null);
@@ -337,29 +338,48 @@ function App() {
   const isLiveFeedDragging = useRef(false);
   const liveFeedDragStartX = useRef(0);
   const liveFeedDragStartScroll = useRef(0);
+  const liveFeedClickActive = useRef(false);
   const sessionId = useRef(getSessionId());
 
-  const handleLiveFeedPointerDown = (event) => {
+  const handleLiveFeedMouseDown = (event) => {
     const el = liveFeedScrollRef.current;
-    if (!el) return;
-    isLiveFeedDragging.current = true;
+    if (!el || event.button !== 0) return;
+    liveFeedClickActive.current = true;
+    isLiveFeedDragging.current = false;
     liveFeedDragStartX.current = event.clientX;
     liveFeedDragStartScroll.current = el.scrollLeft;
-    el.setPointerCapture(event.pointerId);
+    el.style.cursor = 'grabbing';
   };
 
-  const handleLiveFeedPointerMove = (event) => {
+  const handleLiveFeedMouseMove = (event) => {
     const el = liveFeedScrollRef.current;
-    if (!el || !isLiveFeedDragging.current) return;
+    if (!el || !liveFeedClickActive.current) return;
     const deltaX = event.clientX - liveFeedDragStartX.current;
-    el.scrollLeft = liveFeedDragStartScroll.current - deltaX;
+    if (Math.abs(deltaX) > 5) {
+      isLiveFeedDragging.current = true;
+      el.scrollLeft = liveFeedDragStartScroll.current - deltaX;
+    }
   };
 
-  const handleLiveFeedPointerUp = (event) => {
+  const handleLiveFeedMouseUp = (event) => {
     const el = liveFeedScrollRef.current;
-    if (!el) return;
+    if (!el || !liveFeedClickActive.current) return;
+    const deltaX = event.clientX - liveFeedDragStartX.current;
+    const isClick = Math.abs(deltaX) < 5;
+    if (isClick) {
+      const button = event.target.closest('button[data-video-id]');
+      if (button) {
+        const videoId = button.dataset.videoId;
+        const videoIdx = Number(button.dataset.videoIdx);
+        const video = liveFeedVideos.concat(liveFeedVideos)[videoIdx];
+        if (video && (video.videoId === videoId || video.video_id === videoId)) {
+          setPlayingVideo(video);
+        }
+      }
+    }
+    liveFeedClickActive.current = false;
     isLiveFeedDragging.current = false;
-    el.releasePointerCapture?.(event.pointerId);
+    el.style.cursor = 'grab';
   };
 
   // Report form state
@@ -1333,34 +1353,36 @@ function App() {
             ref={liveFeedScrollRef}
             className="video-scroll hide-scrollbar overflow-x-scroll overflow-y-hidden whitespace-nowrap gap-4 px-4 w-full flex"
             style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y', cursor: 'grab' }}
-            onPointerDown={handleLiveFeedPointerDown}
-            onPointerMove={handleLiveFeedPointerMove}
-            onPointerUp={handleLiveFeedPointerUp}
-            onPointerCancel={handleLiveFeedPointerUp}
+            onMouseDown={handleLiveFeedMouseDown}
+            onMouseMove={handleLiveFeedMouseMove}
+            onMouseUp={handleLiveFeedMouseUp}
+            onMouseLeave={handleLiveFeedMouseUp}
           >
               {liveFeedVideos.concat(liveFeedVideos).map((video, idx) => {
                 const videoId = video.video_id || video.id || video.link?.match(/[?&]v=([^&]+)/)?.[1] || '';
 
                 return (
                   <button
-                    key={`${video.id || idx}-${idx}`}
+                    key={`${video.videoId || video.id || idx}-${idx}`}
                     type="button"
                     onClick={() => setPlayingVideo(video)}
                     className="video-card group inline-flex shrink-0 flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-xl shadow-black/20 transition-transform hover:-translate-y-0.5 hover:border-cyan-500"
                     style={{ minWidth: '280px', maxWidth: '320px' }}
                     data-testid={`live-feed-video-${idx}`}
+                    data-video-id={video.videoId || video.video_id || video.id}
+                    data-video-idx={idx}
                   >
                     <div className="video-thumbnail-wrapper h-28 overflow-hidden bg-slate-900">
                       <img
-                        src={`https://weserv.nl?url=https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
+                        src={`https://weserv.nl?url=https://img.youtube.com/vi/${video.videoId || video.video_id}/mqdefault.jpg`}
                         alt={video.title}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover pointer-events-none"
                         crossOrigin="anonymous"
                         referrerPolicy="no-referrer"
                         onError={() => handleThumbnailError(video.video_id)}
                       />
                     </div>
-                    <div className="px-3 py-3 text-left">
+                    <div className="px-3 py-3 text-left pointer-events-none">
                       <p className="text-sm font-semibold text-gray-100 line-clamp-2">{video.title || 'Live disclosure video'}</p>
                       <p className="text-xs text-gray-500 mt-1">{video.channel || video.channelTitle || 'Live Channel'}</p>
                     </div>
@@ -1500,7 +1522,7 @@ function App() {
             </div>
             <div className="video-iframe-container">
               <iframe
-                src={`https://youtube.com/embed/${playingVideo.videoId || playingVideo.video_id}?autoplay=1`}
+                src={`https://youtube.com${activeVideoEmbedPath}?autoplay=1`}
                 title={playingVideo.title}
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
