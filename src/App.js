@@ -283,12 +283,20 @@ function App() {
       setLiveFeedError(null);
       // Use a static, immediate live feed to avoid network/CORS issues
       setLiveFeedVideos([
-        { videoId: "4_v6unE8gZo", title: "NewsNation: Pentagon UFO Declassified Analysis", video_id: "4_v6unE8gZo", id: "4_v6unE8gZo" },
-        { videoId: "3jZpCz6pL80", title: "Joe Rogan Experience: David Grusch UFO Revelations", video_id: "3jZpCz6pL80", id: "3jZpCz6pL80" },
-        { videoId: "6rGLvX02_mQ", title: "Anonymous Official: The Global Alien Disclosure", video_id: "6rGLvX02_mQ", id: "6rGLvX02_mQ" },
-        { videoId: "am97uWg7Wqw", title: "Mirror Now: Government UFO Files Released", video_id: "am97uWg7Wqw", id: "am97uWg7Wqw" },
-        { videoId: "2a4gxkzY8E8", title: "David Icke: The Truth Behind Anomalous Phenomena", video_id: "2a4gxkzY8E8", id: "2a4gxkzY8E8" }
+        { videoId: "sh6v8M34z7o", title: "Joe Rogan: Luis Elizondo Imminent UFO Disclosure", video_id: "sh6v8M34z7o", id: "sh6v8M34z7o" },
+        { videoId: "4_v6unE8gZo", title: "NewsNation: Urgent Pentagon UAP Retrievial Updates", video_id: "4_v6unE8gZo", id: "4_v6unE8gZo" },
+        { videoId: "RclmZ7090b8", title: "Ross Coulthart: Massive UFO Hidden Under Building", video_id: "RclmZ7090b8", id: "RclmZ7090b8" },
+        { videoId: "3jZpCz6pL80", title: "Joe Rogan Experience: David Grusch Alien Revelations", video_id: "3jZpCz6pL80", id: "3jZpCz6pL80" },
+        { videoId: "6rGLvX02_mQ", title: "Anonymous Official: The Hidden 2026 Alien Timeline", video_id: "6rGLvX02_mQ", id: "6rGLvX02_mQ" },
+        { videoId: "wVf_E_fV1wY", title: "Pentagon Official: Declassified Dynamic UAP Footage", video_id: "wVf_E_fV1wY", id: "wVf_E_fV1wY" },
+        { videoId: "am97uWg7Wqw", title: "Mirror Now: International Secret UFO Files Leak", video_id: "am97uWg7Wqw", id: "am97uWg7Wqw" },
+        { videoId: "M9w_v6G8Aqw", title: "Anonymous: NASA Deep Space Anomalies Exposed", video_id: "M9w_v6G8Aqw", id: "M9w_v6G8Aqw" },
+        { videoId: "XIJgGwBQKuH", title: "Fox News: Historical Congress Hearing on UFOs", video_id: "XIJgGwBQKuH", id: "XIJgGwBQKuH" },
+        { videoId: "vS08w9FaCby", title: "Global News: Fighter Jets Intercept Unknown Spheres", video_id: "vS08w9FaCby", id: "vS08w9FaCby" },
+        { videoId: "2a4gxkzY8E8", title: "David Icke: Breakaway Civilizations & Cosmic Agenda", video_id: "2a4gxkzY8E8", id: "2a4gxkzY8E8" },
+        { videoId: "786Hba2W8L0", title: "SiriusANews: Global UAP Community Live Feed", video_id: "786Hba2W8L0", id: "786Hba2W8L0" }
       ]);
+      setLiveFeedLoading(false);
     } catch (error) {
       console.error('[Live Feed] Multichannel rotation error:', error);
       setLiveFeedError('Failed to load live disclosure feed. ' + (error.message || 'Unknown error'));
@@ -834,7 +842,7 @@ function App() {
         bounds="window"
         dragHandleClassName="chat-drag-handle"
         className="chat-rnd"
-          style={{ position: 'fixed', bottom: '260px', left: '20px', zIndex: 9999, height: '380px' }}
+        style={{ position: 'fixed', bottom: '260px', marginBottom: '30px', left: '20px', zIndex: 99999, height: '380px' }}
       >
       <div className="glass-panel chat-panel-rnd fade-in">
         <div className="list-header chat-drag-handle flex items-center justify-between" style={{ cursor: 'move' }}>
@@ -1299,7 +1307,7 @@ function App() {
           >
             {liveFeedVideos.map((video, idx) => {
               const videoId = video.video_id || video.id || video.link?.match(/[?&]v=([^&]+)/)?.[1] || '';
-              const thumbnail = video.thumbnail || video.snippet?.thumbnails?.medium?.url || video.snippet?.thumbnails?.high?.url || `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+              const thumbnail = video.thumbnail || video.snippet?.thumbnails?.medium?.url || video.snippet?.thumbnails?.high?.url || (video.videoId ? `https://youtube.com/${video.videoId}/mqdefault.jpg` : `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`);
 
               return (
                 <button
