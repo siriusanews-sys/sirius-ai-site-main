@@ -1302,12 +1302,13 @@ function App() {
               flexDirection: 'row',
               overflowX: 'auto',
               whiteSpace: 'nowrap',
-              alignItems: 'stretch'
+              alignItems: 'stretch',
+              flexWrap: 'nowrap',
+              gap: '15px'
             }}
           >
             {liveFeedVideos.map((video, idx) => {
               const videoId = video.video_id || video.id || video.link?.match(/[?&]v=([^&]+)/)?.[1] || '';
-              const thumbnail = video.thumbnail || video.snippet?.thumbnails?.medium?.url || video.snippet?.thumbnails?.high?.url || (video.videoId ? `https://youtube.com/${video.videoId}/mqdefault.jpg` : `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`);
 
               return (
                 <button
@@ -1320,7 +1321,7 @@ function App() {
                 >
                   <div className="video-thumbnail-wrapper h-28 overflow-hidden bg-slate-900">
                     <img
-                      src={thumbnail}
+                      src={"https://youtube.com" + video.videoId + "/mqdefault.jpg"}
                       alt={video.title}
                       className="h-full w-full object-cover"
                       crossOrigin="anonymous"
