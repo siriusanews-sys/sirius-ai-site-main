@@ -159,7 +159,7 @@ h1, h2, h3, h4, h5, h6 {
     }
 
     .animate-marquee {
-        animation: marquee 25s linear infinite;
+        animation: marquee 45s linear infinite;
     }
 }
 
