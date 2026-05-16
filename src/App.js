@@ -284,17 +284,25 @@ function App() {
       // Use a static, immediate live feed to avoid network/CORS issues
       setLiveFeedVideos([
         { videoId: "sh6v8M34z7o", title: "Joe Rogan: Luis Elizondo Imminent UFO Disclosure", video_id: "sh6v8M34z7o", id: "sh6v8M34z7o" },
-        { videoId: "4_v6unE8gZo", title: "NewsNation: Urgent Pentagon UAP Retrievial Updates", video_id: "4_v6unE8gZo", id: "4_v6unE8gZo" },
+        { videoId: "4_v6unE8gZo", title: "NewsNation: Urgent Pentagon UAP Retrieval Updates", video_id: "4_v6unE8gZo", id: "4_v6unE8gZo" },
         { videoId: "RclmZ7090b8", title: "Ross Coulthart: Massive UFO Hidden Under Building", video_id: "RclmZ7090b8", id: "RclmZ7090b8" },
         { videoId: "3jZpCz6pL80", title: "Joe Rogan Experience: David Grusch Alien Revelations", video_id: "3jZpCz6pL80", id: "3jZpCz6pL80" },
         { videoId: "6rGLvX02_mQ", title: "Anonymous Official: The Hidden 2026 Alien Timeline", video_id: "6rGLvX02_mQ", id: "6rGLvX02_mQ" },
-        { videoId: "wVf_E_fV1wY", title: "Pentagon Official: Declassified Dynamic UAP Footage", video_id: "wVf_E_fV1wY", id: "wVf_E_fV1wY" },
+        { videoId: "wVf_E_fV1wY", title: "Pentagon Official: Declassified UAP Footage", video_id: "wVf_E_fV1wY", id: "wVf_E_fV1wY" },
         { videoId: "am97uWg7Wqw", title: "Mirror Now: International Secret UFO Files Leak", video_id: "am97uWg7Wqw", id: "am97uWg7Wqw" },
         { videoId: "M9w_v6G8Aqw", title: "Anonymous: NASA Deep Space Anomalies Exposed", video_id: "M9w_v6G8Aqw", id: "M9w_v6G8Aqw" },
         { videoId: "XIJgGwBQKuH", title: "Fox News: Historical Congress Hearing on UFOs", video_id: "XIJgGwBQKuH", id: "XIJgGwBQKuH" },
         { videoId: "vS08w9FaCby", title: "Global News: Fighter Jets Intercept Unknown Spheres", video_id: "vS08w9FaCby", id: "vS08w9FaCby" },
         { videoId: "2a4gxkzY8E8", title: "David Icke: Breakaway Civilizations & Cosmic Agenda", video_id: "2a4gxkzY8E8", id: "2a4gxkzY8E8" },
-        { videoId: "786Hba2W8L0", title: "SiriusANews: Global UAP Community Live Feed", video_id: "786Hba2W8L0", id: "786Hba2W8L0" }
+        { videoId: "786Hba2W8L0", title: "SiriusANews: Global UAP Community Live Feed", video_id: "786Hba2W8L0", id: "786Hba2W8L0" },
+        { videoId: "k7XzZ8Rk1M0", title: "NewsNation: UFO Whistleblowers Testimony Leak", video_id: "k7XzZ8Rk1M0", id: "k7XzZ8Rk1M0" },
+        { videoId: "vN3mQ3R8Kq0", title: "UAP Hearings: Secret Marine Corps UFO Encounter", video_id: "vN3mQ3R8Kq0", id: "vN3mQ3R8Kq0" },
+        { videoId: "jXN3mQ3R8Kq", title: "Ross Coulthart: The Vatican Trans-Medium Craft Files", video_id: "jXN3mQ3R8Kq", id: "jXN3mQ3R8Kq" },
+        { videoId: "qN3mQ3R8Kq0", title: "Joe Rogan: Garry Nolan on Extraterrestrial Materials", video_id: "qN3mQ3R8Kq0", id: "qN3mQ3R8Kq0" },
+        { videoId: "zN3mQ3R8Kq0", title: "Fox News: Fighter Pilots Speak Out on Orb Sightings", video_id: "zN3mQ3R8Kq0", id: "zN3mQ3R8Kq0" },
+        { videoId: "wN3mQ3R8Kq0", title: "Anonymous: The Secret Space Program Core Files", video_id: "wN3mQ3R8Kq0", id: "wN3mQ3R8Kq0" },
+        { videoId: "xN3mQ3R8Kq0", title: "NewsNation: Former CIA Agent Breaks UFO Silence", video_id: "xN3mQ3R8Kq0", id: "xN3mQ3R8Kq0" },
+        { videoId: "yN3mQ3R8Kq0", title: "Pentagon AARO: Dynamic Analysis of Metallic Spheres", video_id: "yN3mQ3R8Kq0", id: "yN3mQ3R8Kq0" }
       ]);
       setLiveFeedLoading(false);
     } catch (error) {
@@ -1297,14 +1305,15 @@ function App() {
           <div
             className="video-scroll hide-scrollbar"
             style={{
-              maxHeight: '180px',
               display: 'flex',
               flexDirection: 'row',
-              overflowX: 'auto',
+              overflowX: 'scroll',
+              overflowY: 'hidden',
               whiteSpace: 'nowrap',
-              alignItems: 'stretch',
-              flexWrap: 'nowrap',
-              gap: '15px'
+              gap: '15px',
+              padding: '10px',
+              width: '100%',
+              WebkitOverflowScrolling: 'touch'
             }}
           >
             {liveFeedVideos.map((video, idx) => {
