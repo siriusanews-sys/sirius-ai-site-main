@@ -283,12 +283,11 @@ function App() {
       setLiveFeedError(null);
       // Use a static, immediate live feed to avoid network/CORS issues
       setLiveFeedVideos([
-        { videoId: "4_v6unE8gZorAsfVbOn2Vw", video_id: "4_v6unE8gZorAsfVbOn2Vw", id: "4_v6unE8gZorAsfVbOn2Vw", title: "NewsNation: Pentagon UFO Declassified Footage" },
-        { videoId: "3jZpCz6pL80", video_id: "3jZpCz6pL80", id: "3jZpCz6pL80", title: "Joe Rogan Experience: Aliens & Cosmic Revelations" },
-        { videoId: "6rGLvX02_mQ", video_id: "6rGLvX02_mQ", id: "6rGLvX02_mQ", title: "Anonymous Official: The Global UFO Disclosure Project" },
-        { videoId: "dQw4w9WgXcQ", video_id: "dQw4w9WgXcQ", id: "dQw4w9WgXcQ", title: "SiriusANews: Latest UAP Community Live Report" },
-        { videoId: "2a4gxkzY8E8", video_id: "2a4gxkzY8E8", id: "2a4gxkzY8E8", title: "David Icke: The Truth Behind the Anomalous Phenomena" },
-        { videoId: "Y8Zp_bOn2Vw", video_id: "Y8Zp_bOn2Vw", id: "Y8Zp_bOn2Vw", title: "Mirror Now: Government Files Released Live" }
+        { videoId: "4_v6unE8gZo", title: "NewsNation: Pentagon UFO Declassified Analysis", video_id: "4_v6unE8gZo", id: "4_v6unE8gZo" },
+        { videoId: "3jZpCz6pL80", title: "Joe Rogan Experience: David Grusch UFO Revelations", video_id: "3jZpCz6pL80", id: "3jZpCz6pL80" },
+        { videoId: "6rGLvX02_mQ", title: "Anonymous Official: The Global Alien Disclosure", video_id: "6rGLvX02_mQ", id: "6rGLvX02_mQ" },
+        { videoId: "am97uWg7Wqw", title: "Mirror Now: Government UFO Files Released", video_id: "am97uWg7Wqw", id: "am97uWg7Wqw" },
+        { videoId: "2a4gxkzY8E8", title: "David Icke: The Truth Behind Anomalous Phenomena", video_id: "2a4gxkzY8E8", id: "2a4gxkzY8E8" }
       ]);
     } catch (error) {
       console.error('[Live Feed] Multichannel rotation error:', error);
@@ -835,7 +834,7 @@ function App() {
         bounds="window"
         dragHandleClassName="chat-drag-handle"
         className="chat-rnd"
-        style={{ position: 'fixed', bottom: '240px', left: '20px', zIndex: 1000 }}
+          style={{ position: 'fixed', bottom: '260px', left: '20px', zIndex: 9999, height: '380px' }}
       >
       <div className="glass-panel chat-panel-rnd fade-in">
         <div className="list-header chat-drag-handle flex items-center justify-between" style={{ cursor: 'move' }}>
