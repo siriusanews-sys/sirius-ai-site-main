@@ -333,7 +333,34 @@ function App() {
   const [neosLoading, setNeosLoading] = useState(false);
   const globeRef = useRef();
   const chatEndRef = useRef();
+  const liveFeedScrollRef = useRef(null);
+  const isLiveFeedDragging = useRef(false);
+  const liveFeedDragStartX = useRef(0);
+  const liveFeedDragStartScroll = useRef(0);
   const sessionId = useRef(getSessionId());
+
+  const handleLiveFeedPointerDown = (event) => {
+    const el = liveFeedScrollRef.current;
+    if (!el) return;
+    isLiveFeedDragging.current = true;
+    liveFeedDragStartX.current = event.clientX;
+    liveFeedDragStartScroll.current = el.scrollLeft;
+    el.setPointerCapture(event.pointerId);
+  };
+
+  const handleLiveFeedPointerMove = (event) => {
+    const el = liveFeedScrollRef.current;
+    if (!el || !isLiveFeedDragging.current) return;
+    const deltaX = event.clientX - liveFeedDragStartX.current;
+    el.scrollLeft = liveFeedDragStartScroll.current - deltaX;
+  };
+
+  const handleLiveFeedPointerUp = (event) => {
+    const el = liveFeedScrollRef.current;
+    if (!el) return;
+    isLiveFeedDragging.current = false;
+    el.releasePointerCapture?.(event.pointerId);
+  };
 
   // Report form state
   const [reportForm, setReportForm] = useState({
@@ -1303,10 +1330,14 @@ function App() {
             </button>
           </div>
           <div
+            ref={liveFeedScrollRef}
             className="video-scroll hide-scrollbar overflow-x-scroll overflow-y-hidden whitespace-nowrap gap-4 px-4 w-full flex"
-            style={{ WebkitOverflowScrolling: 'touch' }}
+            style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y', cursor: 'grab' }}
+            onPointerDown={handleLiveFeedPointerDown}
+            onPointerMove={handleLiveFeedPointerMove}
+            onPointerUp={handleLiveFeedPointerUp}
+            onPointerCancel={handleLiveFeedPointerUp}
           >
-            <div className="flex gap-4 animate-marquee">
               {liveFeedVideos.concat(liveFeedVideos).map((video, idx) => {
                 const videoId = video.video_id || video.id || video.link?.match(/[?&]v=([^&]+)/)?.[1] || '';
 
@@ -1321,7 +1352,7 @@ function App() {
                   >
                     <div className="video-thumbnail-wrapper h-28 overflow-hidden bg-slate-900">
                       <img
-                        src={"https://youtube.com/" + video.videoId + "/mqdefault.jpg"}
+                        src={`https://weserv.nl?url=https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
                         alt={video.title}
                         className="h-full w-full object-cover"
                         crossOrigin="anonymous"
@@ -1336,7 +1367,6 @@ function App() {
                   </button>
                 );
               })}
-            </div>
           </div>
         </div>
       </div>

@@ -152,17 +152,6 @@ h1, h2, h3, h4, h5, h6 {
     scrollbar-width: none;
 }
 
-@layer utilities {
-    @keyframes marquee {
-        0% { transform: translateX(0%); }
-        100% { transform: translateX(-50%); }
-    }
-
-    .animate-marquee {
-        animation: marquee 45s linear infinite;
-    }
-}
-
 /* Glowing Effects */
 .glow-yellow {
     box-shadow: 0 0 20px rgba(232, 255, 0, 0.5), 0 0 40px rgba(232, 255, 0, 0.3);
