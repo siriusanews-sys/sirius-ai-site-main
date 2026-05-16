@@ -1303,48 +1303,40 @@ function App() {
             </button>
           </div>
           <div
-            className="video-scroll hide-scrollbar"
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              overflowX: 'scroll',
-              overflowY: 'hidden',
-              whiteSpace: 'nowrap',
-              gap: '15px',
-              padding: '10px',
-              width: '100%',
-              WebkitOverflowScrolling: 'touch'
-            }}
+            className="video-scroll hide-scrollbar overflow-x-scroll overflow-y-hidden whitespace-nowrap gap-4 px-4 w-full flex"
+            style={{ WebkitOverflowScrolling: 'touch' }}
           >
-            {liveFeedVideos.map((video, idx) => {
-              const videoId = video.video_id || video.id || video.link?.match(/[?&]v=([^&]+)/)?.[1] || '';
+            <div className="flex gap-4 animate-marquee">
+              {liveFeedVideos.concat(liveFeedVideos).map((video, idx) => {
+                const videoId = video.video_id || video.id || video.link?.match(/[?&]v=([^&]+)/)?.[1] || '';
 
-              return (
-                <button
-                  key={video.id || idx}
-                  type="button"
-                  onClick={() => setPlayingVideo(video)}
-                  className="video-card group inline-flex shrink-0 flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-xl shadow-black/20 transition-transform hover:-translate-y-0.5 hover:border-cyan-500"
-                  style={{ minWidth: '280px', maxWidth: '320px', marginRight: '12px' }}
-                  data-testid={`live-feed-video-${idx}`}
-                >
-                  <div className="video-thumbnail-wrapper h-28 overflow-hidden bg-slate-900">
-                    <img
-                      src={"https://youtube.com/" + video.videoId + "/mqdefault.jpg"}
-                      alt={video.title}
-                      className="h-full w-full object-cover"
-                      crossOrigin="anonymous"
-                      referrerPolicy="no-referrer"
-                      onError={() => handleThumbnailError(video.video_id)}
-                    />
-                  </div>
-                  <div className="px-3 py-3 text-left">
-                    <p className="text-sm font-semibold text-gray-100 line-clamp-2">{video.title || 'Live disclosure video'}</p>
-                    <p className="text-xs text-gray-500 mt-1">{video.channel || video.channelTitle || 'Live Channel'}</p>
-                  </div>
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={`${video.id || idx}-${idx}`}
+                    type="button"
+                    onClick={() => setPlayingVideo(video)}
+                    className="video-card group inline-flex shrink-0 flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-xl shadow-black/20 transition-transform hover:-translate-y-0.5 hover:border-cyan-500"
+                    style={{ minWidth: '280px', maxWidth: '320px' }}
+                    data-testid={`live-feed-video-${idx}`}
+                  >
+                    <div className="video-thumbnail-wrapper h-28 overflow-hidden bg-slate-900">
+                      <img
+                        src={"https://youtube.com/" + video.videoId + "/mqdefault.jpg"}
+                        alt={video.title}
+                        className="h-full w-full object-cover"
+                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
+                        onError={() => handleThumbnailError(video.video_id)}
+                      />
+                    </div>
+                    <div className="px-3 py-3 text-left">
+                      <p className="text-sm font-semibold text-gray-100 line-clamp-2">{video.title || 'Live disclosure video'}</p>
+                      <p className="text-xs text-gray-500 mt-1">{video.channel || video.channelTitle || 'Live Channel'}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -1478,7 +1470,7 @@ function App() {
             </div>
             <div className="video-iframe-container">
               <iframe
-                src={`https://www.youtube.com/embed/${playingVideo.video_id}?autoplay=1`}
+                src={`https://youtube.com/embed/${playingVideo.videoId || playingVideo.video_id}?autoplay=1`}
                 title={playingVideo.title}
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
