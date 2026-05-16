@@ -1330,7 +1330,7 @@ function App() {
                 >
                   <div className="video-thumbnail-wrapper h-28 overflow-hidden bg-slate-900">
                     <img
-                      src={"https://youtube.com" + video.videoId + "/mqdefault.jpg"}
+                      src={"https://youtube.com/" + video.videoId + "/mqdefault.jpg"}
                       alt={video.title}
                       className="h-full w-full object-cover"
                       crossOrigin="anonymous"
