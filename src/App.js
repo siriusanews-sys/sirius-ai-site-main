@@ -274,18 +274,81 @@ function App() {
   };
 
   /**
-   * Fetch latest verified UAP/UFO disclosure news for independent Live Feed
-   * Completely separate from chat-triggered videos
+   * Multichannel Rotation Logic - Direct YouTube RSS via AllOrigins proxy
+   * Fetches latest verified UAP/UFO disclosure news from rotated news channels
    */
   const fetchLiveFeed = async () => {
     try {
       setLiveFeedLoading(true);
       setLiveFeedError(null);
-      const disclosureVideos = await fetchDisclosureNewsVideos(12);
-      setLiveFeedVideos(disclosureVideos);
+
+      // Target YouTube Channel IDs - multichannel rotation pool
+      const CHANNEL_IDS = [
+        'UCwS08w9FaCbywN9Nsh0rcbA', // NewsNation
+        'UCzQUP1qoWDoEbmsQxvdjxgQ', // Joe Rogan (PowerfulJRE)
+        'UC8Cl9QaRtu0m9Fca7p97uWg', // Anonymous Official
+        'UCqvd_wI_4vWv9Y46G8w7Wqw', // Reuters
+        'UCXIJgGwBQKuHte_6uY3SGwA', // Fox News
+        'UC786Hba2W8L_IDV_T39Y8Cg', // Mirror Now
+        'UCb369XInT_jRno68E7XNffA', // David Icke
+        'UC_vS08w9FaCbywN9Nsh0rcbA'  // SiriusANews
+      ];
+
+      // Random channel selection from pool
+      const selectedChannelId = CHANNEL_IDS[Math.floor(Math.random() * CHANNEL_IDS.length)];
+
+      // Construct YouTube RSS feed URL and proxy through AllOrigins
+      const youtubeRssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${selectedChannelId}`;
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(youtubeRssUrl)}`;
+
+      // Fetch via unblockable AllOrigins proxy with extended 25-second timeout to shatter Vercel's 1500ms cache lock
+      const response = await axios.get(proxyUrl, { timeout: 25000 });
+      const feedData = response.data;
+
+      // Parse XML feed and extract video entries (lightweight regex + string slice)
+      const videoMatches = feedData.match(/<entry>[\s\S]*?<\/entry>/g) || [];
+      const extractedVideos = [];
+
+      videoMatches.slice(0, 8).forEach(entryXml => {
+        try {
+          // Extract video ID from yt:videoId tag
+          const videoIdMatch = entryXml.match(/<yt:videoId>([^<]+)<\/yt:videoId>/);
+          const videoId = videoIdMatch ? videoIdMatch[1] : null;
+
+          // Extract title from title tag
+          const titleMatch = entryXml.match(/<title>([^<]+)<\/title>/);
+          const title = titleMatch ? titleMatch[1] : 'Live disclosure video';
+
+          // Extract channel name from author name
+          const channelMatch = entryXml.match(/<author>\s*<name>([^<]+)<\/name>/);
+          const channelTitle = channelMatch ? channelMatch[1] : 'Live Channel';
+
+          if (videoId) {
+            extractedVideos.push({
+              video_id: videoId,
+              id: videoId,
+              title: title,
+              channel: channelTitle,
+              channelTitle: channelTitle,
+              thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+              link: `https://www.youtube.com/watch?v=${videoId}`
+            });
+          }
+        } catch (parseErr) {
+          console.log('[Live Feed] Entry parse error:', parseErr);
+        }
+      });
+
+      // Map safely into liveFeedVideos state
+      if (extractedVideos.length > 0) {
+        setLiveFeedVideos(extractedVideos);
+      } else {
+        console.warn('[Live Feed] No videos extracted from channel');
+        setLiveFeedVideos([]);
+      }
     } catch (error) {
-      console.error('[Live Feed] Error fetching disclosure news:', error);
-      setLiveFeedError('Failed to load live disclosure feed from backend.');
+      console.error('[Live Feed] Multichannel rotation error:', error);
+      setLiveFeedError('Failed to load live disclosure feed. ' + (error.message || 'Unknown error'));
       setLiveFeedVideos([]);
     } finally {
       setLiveFeedLoading(false);
@@ -364,7 +427,7 @@ function App() {
       await Promise.all(queries.map(async ({ q, gl, hl }) => {
         try {
           const rssUrl = encodeURIComponent(`https://news.google.com/rss/search?q=${q}&hl=${hl}-${gl}&gl=${gl}&ceid=${gl}:${hl}`);
-          const res = await axios.get(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}&count=10`, { timeout: 8000 });
+          const res = await axios.get(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}&count=10`, { timeout: 20000 });
           if (res.data?.items) {
             allItems.push(...res.data.items);
           }
@@ -426,7 +489,7 @@ function App() {
       const apiUrl = `https://ssd-api.jpl.nasa.gov/cad.api?date-min=${formatDate(today)}&date-max=${formatDate(endDate)}&dist-max=0.2&sort=date`;
       const res = await axios.get(
         `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`,
-        { timeout: 15000 }
+        { timeout: 25000 }
       );
       
       const allNeos = [];
@@ -476,6 +539,11 @@ function App() {
   // Independent Live Feed: Fetch latest disclosure news automatically on mount
   useEffect(() => {
     fetchLiveFeed();
+    // Refresh live feed every 5 minutes for updated content
+    const interval = setInterval(() => {
+      fetchLiveFeed();
+    }, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   // Open reader modal - no external fetch, just show summary and link
@@ -823,7 +891,7 @@ function App() {
         bounds="window"
         dragHandleClassName="chat-drag-handle"
         className="chat-rnd"
-        style={{ position: 'fixed', bottom: '220px', zIndex: 1000 }}
+        style={{ position: 'fixed', bottom: '240px', left: '20px', zIndex: 1000 }}
       >
       <div className="glass-panel chat-panel-rnd fade-in">
         <div className="list-header chat-drag-handle flex items-center justify-between" style={{ cursor: 'move' }}>
