@@ -236,6 +236,109 @@ const getSessionId = () => {
   return sessionId;
 };
 
+const videoData = [
+  { id: 1, title: 'Joe Rogan: Luis Elizondo Imminent UAP', videoId: '5F_fN9S8Lp4' },
+  { id: 2, title: 'NewsNation: Urgent Pentagon UAP Report', videoId: 'SgI4Tj9yKls' },
+  { id: 3, title: 'Ross Coulthart: Massive UFO Hidden', videoId: 'rO6G6h6x6fM' },
+  { id: 4, title: 'Joe Rogan: David Grusch Alien Tech', videoId: 'kRO5j4A7C38' },
+  { id: 5, title: 'Pentagon Declassified UFO Footage', videoId: 'rO_M0h96k2A' },
+  { id: 6, title: 'NewsNation: Former CIA Agent Breaks Silence', videoId: 'k3unb8M1Yk4' },
+  { id: 7, title: 'Pentagon AARO: Dynamic Analysis of UAP', videoId: 'O7Z_g_8bZ_g' },
+  { id: 8, title: 'Anonymous: The Hidden 2026 UFO Agenda', videoId: 'm6X8A5J4QWc' },
+  { id: 9, title: '60 Minutes: US Navy Pilots UFO Encounter', videoId: 'ZBtMbBPzqHY' },
+  { id: 10, title: 'TEDx: The Science Behind UFO Sightings', videoId: '4M_YVv183eM' },
+  { id: 11, title: 'Lex Fridman: David Fravor UFO Breakdown', videoId: 'aB8zcAttP1Y' },
+  { id: 12, title: 'CNN: US Military Shoots Down Objects', videoId: 'mX_9rQ2eLqI' },
+  { id: 13, title: 'National Geographic: Secret UFO Files', videoId: 'H9G7D_wK_7c' },
+  { id: 14, title: 'Discovery: Tracking UFOs with Radar Data', videoId: 'wV3r4M1_6vU' }
+];
+
+function LiveMediaFooter() {
+  const [activeVideo, setActiveVideo] = useState(null);
+  const scrollRef = useRef(null);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+  const dragDistance = useRef(0);
+
+  const onMouseDown = (e) => {
+    if (!scrollRef.current) return;
+    isDragging.current = true;
+    startX.current = e.pageX - scrollRef.current.offsetLeft;
+    scrollLeft.current = scrollRef.current.scrollLeft;
+    dragDistance.current = 0;
+  };
+
+  const onMouseMove = (e) => {
+    if (!isDragging.current || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX.current) * 1.5;
+    scrollRef.current.scrollLeft = scrollLeft.current - walk;
+    dragDistance.current = Math.abs(x - startX.current);
+  };
+
+  const onMouseUp = (video) => {
+    isDragging.current = false;
+    if (dragDistance.current < 8) {
+      setActiveVideo(video);
+    }
+  };
+
+  return (
+    <div className="fixed bottom-0 left-0 w-full bg-slate-950/90 backdrop-blur-md border-t border-cyan-500/30 p-4 z-50 select-none">
+      <div className="text-cyan-400 font-bold mb-2 px-2 flex items-center gap-2 text-xs uppercase tracking-wider">
+        <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span> Live Media
+      </div>
+
+      <div
+        ref={scrollRef}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseLeave={() => { isDragging.current = false; }}
+        className="flex gap-4 overflow-x-auto scrollbar-none cursor-grab active:cursor-grabbing pb-2"
+        style={{ scrollBehavior: isDragging.current ? 'auto' : 'smooth' }}
+      >
+        {videoData.map((video) => (
+          <div
+            key={video.id}
+            onMouseUp={() => onMouseUp(video)}
+            className="flex-shrink-0 w-64 bg-slate-900/80 border border-slate-800 rounded-lg p-2 hover:border-cyan-500/50 transition-colors"
+          >
+            <img
+              src={`https://weserv.nl?url=https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
+              alt={video.title}
+              className="w-full h-32 object-cover rounded-md pointer-events-none mb-2"
+              onError={(e) => { e.target.src = `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`; }}
+            />
+            <p className="text-white text-xs font-medium truncate pointer-events-none">{video.title}</p>
+          </div>
+        ))}
+      </div>
+
+      {activeVideo && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="relative bg-slate-900 border border-cyan-500/40 rounded-xl p-2 w-full max-w-3xl aspect-video shadow-2xl shadow-cyan-500/10">
+            <button
+              onClick={() => setActiveVideo(null)}
+              className="absolute -top-10 right-0 text-white bg-slate-800 hover:bg-red-600 px-3 py-1 rounded-md text-xs transition-colors"
+            >
+              Close ✕
+            </button>
+            <iframe
+              className="w-full h-full rounded-lg"
+              src={`https://www.youtube.com/embed/${activeVideo.videoId}?autoplay=1&rel=0`}
+              title={activeVideo.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function App() {
   const [sightings, setSightings] = useState(STATIC_SIGHTINGS);
   const [satellites, setSatellites] = useState(simulateSatellitePositions(STATIC_SATELLITES));
@@ -1324,68 +1427,7 @@ function App() {
         </div>
       )}
 
-      {/* Video Bar - Independent Live Media Feed */}
-      <div className="video-bar" data-testid="video-bar">
-        <div className="video-bar-container">
-          <div className="flex items-center justify-between px-6 mb-2">
-            <h3 className="text-sm font-semibold flex items-center gap-2">
-              <Play size={14} className="text-red-500" />
-              Live Media Feed - UAP/UFO Disclosure News
-            </h3>
-            <button 
-              className="video-refresh-btn"
-              onClick={refreshLiveFeed}
-              disabled={liveFeedLoading}
-              data-testid="refresh-live-feed-btn"
-              title="Refresh live feed"
-            >
-              <RefreshCw size={14} className={liveFeedLoading ? 'animate-spin' : ''} />
-              <span className="text-xs ml-1">Refresh</span>
-            </button>
-          </div>
-          <div
-            ref={liveFeedScrollRef}
-            className="video-scroll hide-scrollbar overflow-x-scroll overflow-y-hidden whitespace-nowrap gap-4 px-4 w-full flex"
-            style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y', cursor: 'grab' }}
-            onMouseDown={handleLiveFeedMouseDown}
-            onMouseMove={handleLiveFeedMouseMove}
-            onMouseUp={handleLiveFeedMouseUp}
-            onMouseLeave={handleLiveFeedMouseUp}
-          >
-              {liveFeedVideos.concat(liveFeedVideos).map((video, idx) => {
-                const videoId = video.videoId || video.video_id || video.id || video.link?.match(/[?&]v=([^&]+)/)?.[1] || '';
-
-                return (
-                  <button
-                    key={`${videoId || idx}-${idx}`}
-                    type="button"
-                    onClick={() => setPlayingVideo(video)}
-                    className="video-card group inline-flex shrink-0 flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-xl shadow-black/20 transition-transform hover:-translate-y-0.5 hover:border-cyan-500"
-                    style={{ minWidth: '280px', maxWidth: '320px' }}
-                    data-testid={`live-feed-video-${idx}`}
-                    data-video-id={videoId}
-                    data-video-idx={idx}
-                  >
-                    <div className="video-thumbnail-wrapper h-28 overflow-hidden bg-slate-900">
-                      <img
-                        src={`https://weserv.nl?url=https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
-                        alt={video.title}
-                        className="h-full w-full object-cover pointer-events-none"
-                        crossOrigin="anonymous"
-                        referrerPolicy="no-referrer"
-                        onError={() => handleThumbnailError(videoId)}
-                      />
-                    </div>
-                    <div className="px-3 py-3 text-left pointer-events-none">
-                      <p className="text-sm font-semibold text-gray-100 line-clamp-2">{video.title || 'Live disclosure video'}</p>
-                      <p className="text-xs text-gray-500 mt-1">{video.channel || video.channelTitle || 'Live Channel'}</p>
-                    </div>
-                  </button>
-                );
-              })}
-          </div>
-        </div>
-      </div>
+      <LiveMediaFooter />
 
       {/* Live News Feed Sidebar (Top Right) */}
       <div 
