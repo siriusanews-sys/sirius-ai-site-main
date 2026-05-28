@@ -281,7 +281,7 @@ function LiveMediaFooter() {
   const onMouseUp = (video) => {
     isDragging.current = false;
     if (dragDistance.current < 8) {
-      setActiveVideo(video);
+      onVideoSelect(video);
     }
   };
 
@@ -315,26 +315,6 @@ function LiveMediaFooter() {
           </div>
         ))}
       </div>
-
-      {activeVideo && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="relative bg-slate-900 border border-cyan-500/40 rounded-xl p-2 w-full max-w-3xl aspect-video shadow-2xl shadow-cyan-500/10">
-            <button
-              onClick={() => setActiveVideo(null)}
-              className="absolute -top-10 right-0 text-white bg-slate-800 hover:bg-red-600 px-3 py-1 rounded-md text-xs transition-colors"
-            >
-              Close ✕
-            </button>
-            <iframe
-              className="w-full h-full rounded-lg"
-              src={`https://www.youtube.com/embed/${activeVideo.videoId}?autoplay=1&rel=0`}
-              title={activeVideo.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -422,7 +402,6 @@ function App() {
   const [highlightedLocation, setHighlightedLocation] = useState(null);
   const [showReportForm, setShowReportForm] = useState(false);
   const [playingVideo, setPlayingVideo] = useState(null);
-  const activeVideoEmbedSrc = playingVideo ? `https://www.youtube.com/embed/${playingVideo.videoId || playingVideo.id}?autoplay=1` : '';
   const [showPayPalModal, setShowPayPalModal] = useState(false);
   const [newsItems, setNewsItems] = useState([]);
   const [readerArticle, setReaderArticle] = useState(null);
@@ -1427,7 +1406,7 @@ function App() {
         </div>
       )}
 
-      <LiveMediaFooter />
+      <LiveMediaFooter onVideoSelect={setPlayingVideo} />
 
       {/* Live News Feed Sidebar (Top Right) */}
       <div 
@@ -1534,41 +1513,6 @@ function App() {
         </div>
       )}
 
-      {/* Video Player Modal */}
-      {playingVideo && (
-        <div 
-          className="video-modal-overlay"
-          onClick={() => setPlayingVideo(null)}
-          data-testid="video-modal"
-        >
-          <div 
-            className="video-modal-content glass-panel"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button 
-              className="video-modal-close"
-              onClick={() => setPlayingVideo(null)}
-              data-testid="close-video-btn"
-            >
-              <X size={20} />
-            </button>
-            <div className="video-modal-header">
-              <h3 className="text-lg font-semibold">{playingVideo.title}</h3>
-              <p className="text-sm text-gray-400">{playingVideo.channel}</p>
-            </div>
-            <div className="video-iframe-container">
-              <iframe
-                src={activeVideoEmbedSrc}
-                title={playingVideo.title}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* PayPal QR Code Modal */}
       {showPayPalModal && (
         <div 
@@ -1602,6 +1546,35 @@ function App() {
             <p className="text-center text-xs text-gray-500 mt-4">
               Your support helps keep SIRIUS AI exploring the unknown
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Unified Video Player Modal */}
+      {playingVideo && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md"
+          onClick={() => setPlayingVideo(null)}
+          data-testid="video-modal"
+        >
+          <div 
+            className="relative bg-slate-900 border border-cyan-500/40 rounded-xl p-2 w-full max-w-3xl aspect-video shadow-2xl shadow-cyan-500/10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setPlayingVideo(null)}
+              className="absolute -top-10 right-0 text-white bg-slate-800 hover:bg-red-600 px-3 py-1 rounded-md text-xs transition-colors"
+              data-testid="close-video-btn"
+            >
+              Close ✕
+            </button>
+            <iframe
+              className="w-full h-full rounded-lg"
+              src={`https://www.youtube.com/embed/${playingVideo.videoId || playingVideo.video_id || playingVideo.id}?autoplay=1`}
+              title={playingVideo.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
           </div>
         </div>
       )}
