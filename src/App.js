@@ -253,7 +253,7 @@ const videoData = [
   { id: 14, title: 'Discovery: Tracking UFOs with Radar Data', videoId: 'wV3r4M1_6vU' }
 ];
 
-function LiveMediaFooter() {
+function LiveMediaFooter({ videos, onSelectVideo }) {
   const [activeVideo, setActiveVideo] = useState(null);
   const scrollRef = useRef(null);
   const isDragging = useRef(false);
@@ -301,7 +301,7 @@ function LiveMediaFooter() {
       >
         {videoData.map((video) => (
           <div
-            key={video.id}
+            key={video.id} onClick={() => onSelectVideo(video)}
             onMouseUp={() => onMouseUp(video)}
             className="flex-shrink-0 w-64 bg-slate-900/80 border border-slate-800 rounded-lg p-2 hover:border-cyan-500/50 transition-colors"
           >
@@ -1580,7 +1580,7 @@ function App() {
       )}
 
       {/* Toast Notifications */}
-      <Toaster position="top-right" richColors />
+      <Toaster position="top-right" richColors /> <LiveMediaFooter videos={liveFeedVideos} onSelectVideo={setSelectedVideo} />
     </div>
   );
 }
