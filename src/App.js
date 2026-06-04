@@ -236,22 +236,19 @@ const getSessionId = () => {
   return sessionId;
 };
 
-const videoData = [
-  { id: 1, title: 'Joe Rogan: Luis Elizondo Imminent UAP', videoId: '5F_fN9S8Lp4' },
-  { id: 2, title: 'NewsNation: Urgent Pentagon UAP Report', videoId: 'SgI4Tj9yKls' },
-  { id: 3, title: 'Ross Coulthart: Massive UFO Hidden', videoId: 'rO6G6h6x6fM' },
-  { id: 4, title: 'Joe Rogan: David Grusch Alien Tech', videoId: 'kRO5j4A7C38' },
-  { id: 5, title: 'Pentagon Declassified UFO Footage', videoId: 'rO_M0h96k2A' },
-  { id: 6, title: 'NewsNation: Former CIA Agent Breaks Silence', videoId: 'k3unb8M1Yk4' },
-  { id: 7, title: 'Pentagon AARO: Dynamic Analysis of UAP', videoId: 'O7Z_g_8bZ_g' },
-  { id: 8, title: 'Anonymous: The Hidden 2026 UFO Agenda', videoId: 'm6X8A5J4QWc' },
-  { id: 9, title: '60 Minutes: US Navy Pilots UFO Encounter', videoId: 'ZBtMbBPzqHY' },
-  { id: 10, title: 'TEDx: The Science Behind UFO Sightings', videoId: '4M_YVv183eM' },
-  { id: 11, title: 'Lex Fridman: David Fravor UFO Breakdown', videoId: 'aB8zcAttP1Y' },
-  { id: 12, title: 'CNN: US Military Shoots Down Objects', videoId: 'mX_9rQ2eLqI' },
-  { id: 13, title: 'National Geographic: Secret UFO Files', videoId: 'H9G7D_wK_7c' },
-  { id: 14, title: 'Discovery: Tracking UFOs with Radar Data', videoId: 'wV3r4M1_6vU' }
+// Hardcoded, working YouTube video list
+const VIDEO_POOL = [
+  { id: 1, title: 'Pentagon UAP Report', videoId: 'PfSXkfV_mhA' },
+  { id: 2, title: 'Navy Pilots UFO Encounter', videoId: 'ZBtMbBPzqHY' },
+  { id: 3, title: 'Phoenix Lights Story', videoId: '2TumprpOwHY' },
+  { id: 4, title: 'What We Know About UAPs', videoId: 'SpeSpA3e56A' },
+  { id: 5, title: 'David Fravor Tic Tac Encounter', videoId: 'pWwwTSJwhmw' },
+  { id: 6, title: 'David Grusch Hearing', videoId: 'FCEnaC4UqAE' },
+  { id: 7, title: 'Avi Loeb on Interstellar Objects', videoId: 'ZrsVVGgANC8' },
+  { id: 8, title: 'SiriusAnews: Latest UFO Update', videoId: 'j_f7EsS9_XU' }
 ];
+
+const videoData = VIDEO_POOL;
 
 function LiveMediaFooter({ onVideoSelect }) {
   const [activeVideo, setActiveVideo] = useState(null);
