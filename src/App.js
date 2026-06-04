@@ -282,6 +282,7 @@ function LiveMediaFooter({ onVideoSelect }) {
   };
 
   const onCardMouseUp = (video) => {
+    console.log("Card clicked, video:", video);
     isDragging.current = false;
     if (dragDistance.current < 8) {
       if (typeof onVideoSelect === 'function') {
@@ -292,6 +293,7 @@ function LiveMediaFooter({ onVideoSelect }) {
 
   return (
     <div className="fixed bottom-0 left-0 w-full bg-slate-950/90 backdrop-blur-md border-t border-cyan-500/30 p-4 z-50 select-none">
+      {console.log("LiveMediaFooter videoData:", videoData)}
       <div className="text-cyan-400 font-bold mb-2 px-2 flex items-center gap-2 text-xs uppercase tracking-wider">
         <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span> Live Media
       </div>
@@ -312,7 +314,7 @@ function LiveMediaFooter({ onVideoSelect }) {
             className="flex-shrink-0 w-64 bg-slate-900/80 border border-slate-800 rounded-lg p-2 hover:border-cyan-500/50 transition-colors cursor-pointer"
           >
             <img
-              src={`https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
+              src={`https://img.youtube.com/vi/${video.videoId || video.video_id}/mqdefault.jpg`}
               alt={video.title}
               className="w-full h-32 object-cover rounded-md pointer-events-none mb-2"
               onError={(e) => { e.target.src = "https://via.placeholder.com/320x180?text=No+Thumbnail"; }}
