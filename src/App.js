@@ -150,7 +150,7 @@ const simulateSatellitePositions = (sats) => {
 const NEWS_PLACEHOLDER = "https://unsplash.com";
 
 // Curated list for the video slider
-const videoData = [
+const VIDEO_DATA = [
   { id: 1, title: 'NewsNation: UFO & UAP Special Report', videoId: 'SgI4Tj9yKls' },
   { id: 2, title: 'Joe Rogan Experience: David Fravor UFO Encounter', videoId: 'aB8zcAttP1Y' },
   { id: 3, title: 'History Channel: Ancient Aliens Unexplained', videoId: '2TumprpOwHY' },
@@ -216,7 +216,7 @@ function LiveMediaFooter({ onVideoSelect }) {
         className="flex gap-4 overflow-x-auto scrollbar-none cursor-grab active:cursor-grabbing pb-2"
         style={{ scrollBehavior: isDragging.current ? 'auto' : 'smooth' }}
       >
-        {videoData.map((video) => (
+        {VIDEO_DATA.map((video) => (
           <div
             key={video.id}
             onMouseUp={() => onCardMouseUp(video)}
