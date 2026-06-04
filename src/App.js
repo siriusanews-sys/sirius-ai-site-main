@@ -150,7 +150,7 @@ const simulateSatellitePositions = (sats) => {
 const NEWS_PLACEHOLDER = "https://unsplash.com";
 
 // Curated list for the video slider
-const VIDEO_DATA = [
+const videoData = [
   { id: 1, title: 'NewsNation: UFO & UAP Special Report', videoId: 'SgI4Tj9yKls' },
   { id: 2, title: 'Joe Rogan Experience: David Fravor UFO Encounter', videoId: 'aB8zcAttP1Y' },
   { id: 3, title: 'History Channel: Ancient Aliens Unexplained', videoId: '2TumprpOwHY' },
@@ -216,17 +216,17 @@ function LiveMediaFooter({ onVideoSelect }) {
         className="flex gap-4 overflow-x-auto scrollbar-none cursor-grab active:cursor-grabbing pb-2"
         style={{ scrollBehavior: isDragging.current ? 'auto' : 'smooth' }}
       >
-        {VIDEO_DATA.map((video) => (
+        {videoData.map((video) => (
           <div
             key={video.id}
             onMouseUp={() => onCardMouseUp(video)}
             className="flex-shrink-0 w-64 bg-slate-900/80 border border-slate-800 rounded-lg p-2 hover:border-cyan-500/50 transition-colors cursor-pointer"
           >
             <img
-              src={`https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`}
+              src={`https://weserv.nl?url=https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
               alt={video.title}
               className="w-full h-32 object-cover rounded-md pointer-events-none mb-2"
-              onError={(e) => { e.target.src = "https://via.placeholder.com/320x180?text=No+Thumbnail"; }}
+              onError={(e) => { e.target.src = `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`; }}
             />
             <p className="text-white text-xs font-medium truncate pointer-events-none">{video.title}</p>
           </div>
