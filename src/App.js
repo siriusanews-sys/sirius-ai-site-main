@@ -149,24 +149,19 @@ const simulateSatellitePositions = (sats) => {
 // SIRIUS AI placeholder image for news modal when article image is missing
 const NEWS_PLACEHOLDER = "https://unsplash.com";
 
-// HARDCODED video pool - 12 verified IDs
+// Hardcoded, working YouTube video list
 const VIDEO_POOL = [
-  { video_id: "j_f7EsS9_XU", title: "SiriusAnews: Latest UFO/UAP Report", channel: "SiriusAnews", sirius: true },
-  { video_id: "PfSXkfV_mhA", title: "Pentagon UFO Videos: Official Release", channel: "CBS News", sirius: false },
-  { video_id: "ZBtMbBPzqHY", title: "Navy Pilots Describe UFO Encounters", channel: "60 Minutes", sirius: false },
-  { video_id: "rO_M0hLlJ-Q", title: "The Rendlesham Forest Incident", channel: "History Channel", sirius: false },
-  { video_id: "2TumprpOwHY", title: "Phoenix Lights: The Full Story", channel: "VICE", sirius: false },
-  { video_id: "SpeSpA3e56A", title: "What We Know About UAPs", channel: "Vox", sirius: false },
-  { video_id: "KQ7Hk70JjLg", title: "Top 10 Most Credible UFO Sightings", channel: "Discovery", sirius: false },
-  { video_id: "mtM7NbHF0-0", title: "Unexplained Mysteries: Aliens & UFOs", channel: "Mystery Files", sirius: false },
-  { video_id: "Jr0JaXfXUvU", title: "Ryan Graves on UAPs", channel: "60 Minutes", sirius: false },
-  { video_id: "pWwwTSJwhmw", title: "David Fravor Tic Tac UFO Encounter", channel: "Lex Fridman", sirius: false },
-  { video_id: "FCEnaC4UqAE", title: "David Grusch Whistleblower Hearing", channel: "C-SPAN", sirius: false },
-  { video_id: "ZrsVVGgANC8", title: "Avi Loeb on Interstellar Objects", channel: "Lex Fridman", sirius: false }
-].map(v => ({
-  ...v,
-  thumbnail: `https://img.youtube.com/vi/${v.video_id}/hqdefault.jpg`
-}));
+  { id: 1, title: 'Pentagon UAP Report', videoId: 'PfSXkfV_mhA', sirius: false },
+  { id: 2, title: 'Navy Pilots UFO Encounter', videoId: 'ZBtMbBPzqHY', sirius: false },
+  { id: 3, title: 'Phoenix Lights Story', videoId: '2TumprpOwHY', sirius: false },
+  { id: 4, title: 'What We Know About UAPs', videoId: 'SpeSpA3e56A', sirius: false },
+  { id: 5, title: 'David Fravor Tic Tac Encounter', videoId: 'pWwwTSJwhmw', sirius: false },
+  { id: 6, title: 'David Grusch Hearing', videoId: 'FCEnaC4UqAE', sirius: false },
+  { id: 7, title: 'Avi Loeb on Interstellar Objects', videoId: 'ZrsVVGgANC8', sirius: false },
+  { id: 8, title: 'SiriusAnews: Latest UFO Update', videoId: 'j_f7EsS9_XU', sirius: true }
+];
+
+const videoData = VIDEO_POOL;
 
 // Curated fallback NEO list (used when API fails)
 const FALLBACK_NEOS = [
@@ -217,7 +212,7 @@ const shuffleArray = (arr) => {
   return a;
 };
 
-// Build video list: SiriusAnews always first, others shuffled - only from the 8-video pool
+// Build video list: SiriusAnews always first, others shuffled
 const buildVideoList = () => {
   const sirius = VIDEO_POOL.find(v => v.sirius);
   const others = shuffleArray(VIDEO_POOL.filter(v => !v.sirius));
@@ -235,20 +230,6 @@ const getSessionId = () => {
   }
   return sessionId;
 };
-
-// Hardcoded, working YouTube video list
-const VIDEO_POOL = [
-  { id: 1, title: 'Pentagon UAP Report', videoId: 'PfSXkfV_mhA' },
-  { id: 2, title: 'Navy Pilots UFO Encounter', videoId: 'ZBtMbBPzqHY' },
-  { id: 3, title: 'Phoenix Lights Story', videoId: '2TumprpOwHY' },
-  { id: 4, title: 'What We Know About UAPs', videoId: 'SpeSpA3e56A' },
-  { id: 5, title: 'David Fravor Tic Tac Encounter', videoId: 'pWwwTSJwhmw' },
-  { id: 6, title: 'David Grusch Hearing', videoId: 'FCEnaC4UqAE' },
-  { id: 7, title: 'Avi Loeb on Interstellar Objects', videoId: 'ZrsVVGgANC8' },
-  { id: 8, title: 'SiriusAnews: Latest UFO Update', videoId: 'j_f7EsS9_XU' }
-];
-
-const videoData = VIDEO_POOL;
 
 function LiveMediaFooter({ onVideoSelect }) {
   const [activeVideo, setActiveVideo] = useState(null);
