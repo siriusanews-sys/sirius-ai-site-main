@@ -155,10 +155,10 @@ const VIDEO_DATA = [
   { id: 2, title: 'Navy Pilots UFO Encounter', videoId: 'ZBtMbBPzqHY' },
   { id: 3, title: 'Phoenix Lights Story', videoId: '2TumprpOwHY' },
   { id: 4, title: 'What We Know About UAPs', videoId: 'SpeSpA3e56A' },
-  { id: 5, title: 'David Fravor Tic Tac Encounter', videoId: 'pWwwTSJwhmw' },
-  { id: 6, title: 'David Grusch Hearing', videoId: 'FCEnaC4UqAE' },
-  { id: 7, title: 'Avi Loeb on Interstellar Objects', videoId: 'ZrsVVGgANC8' },
-  { id: 8, title: 'SiriusAnews: Latest UFO Update', videoId: 'j_f7EsS9_XU' }
+  { id: 5, title: 'David Fravor Tic Tac Encounter', videoId: 'aB8zcAttP1Y' },
+  { id: 6, title: 'NewsNation UAP Update', videoId: 'SgI4Tj9yKls' },
+  { id: 7, title: 'Ross Coulthart: Hidden Truth', videoId: 'rO6G6h6x6fM' },
+  { id: 8, title: 'Ariel School Encounter', videoId: 'hT-sW_yV1Yc' }
 ];
 
 function LiveMediaFooter({ onVideoSelect }) {
