@@ -312,10 +312,10 @@ function LiveMediaFooter({ onVideoSelect }) {
             className="flex-shrink-0 w-64 bg-slate-900/80 border border-slate-800 rounded-lg p-2 hover:border-cyan-500/50 transition-colors cursor-pointer"
           >
             <img
-              src={`https://weserv.nl?url=https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
+              src={`https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
               alt={video.title}
               className="w-full h-32 object-cover rounded-md pointer-events-none mb-2"
-              onError={(e) => { e.target.src = `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`; }}
+              onError={(e) => { e.target.src = "https://via.placeholder.com/320x180?text=No+Thumbnail"; }}
             />
             <p className="text-white text-xs font-medium truncate pointer-events-none">{video.title}</p>
           </div>
@@ -1573,6 +1573,7 @@ function App() {
       Close ✕
       </button>
       <iframe
+        key={selectedVideo.videoId || selectedVideo.video_id}
         className="w-full h-full rounded-lg"
         src={`https://youtube.com/embed/${selectedVideo.videoId || selectedVideo.video_id}?autoplay=1`}
         title={selectedVideo.title}
