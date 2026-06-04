@@ -33,7 +33,6 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { fetchUFOVideos, fetchDisclosureNewsVideos } from "./services/youtubeService";
 import { geocodeLocation } from "./lib/utils";
-import LiveMediaFooter from "./components/LiveMediaFooter";
 
 // Using Vercel serverless functions at /api/* - no external backend needed
 const API = '/api';
@@ -150,9 +149,21 @@ const simulateSatellitePositions = (sats) => {
 // SIRIUS AI placeholder image for news modal when article image is missing
 const NEWS_PLACEHOLDER = "https://unsplash.com";
 
+// Curated list for the video slider
+const VIDEO_DATA = [
+  { id: 1, title: 'Pentagon UAP Report', videoId: 'PfSXkfV_mhA' },
+  { id: 2, title: 'Navy Pilots UFO Encounter', videoId: 'ZBtMbBPzqHY' },
+  { id: 3, title: 'Phoenix Lights Story', videoId: '2TumprpOwHY' },
+  { id: 4, title: 'What We Know About UAPs', videoId: 'SpeSpA3e56A' },
+  { id: 5, title: 'David Fravor Tic Tac Encounter', videoId: 'pWwwTSJwhmw' },
+  { id: 6, title: 'David Grusch Hearing', videoId: 'FCEnaC4UqAE' },
+  { id: 7, title: 'Avi Loeb on Interstellar Objects', videoId: 'ZrsVVGgANC8' },
+  { id: 8, title: 'SiriusAnews: Latest UFO Update', videoId: 'j_f7EsS9_XU' }
+];
+
 function App() {
+  const [videoData, setVideoData] = useState(VIDEO_DATA);
   const [sightings, setSightings] = useState(STATIC_SIGHTINGS);
-  const [satellites, setSatellites] = useState(simulateSatellitePositions(STATIC_SATELLITES));
   const [videosLoading, setVideosLoading] = useState(true);
   const [videosError, setVideosError] = useState(null);
   
