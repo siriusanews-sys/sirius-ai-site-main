@@ -161,7 +161,18 @@ const VIDEO_DATA = [
   { id: 8, title: 'SiriusAnews: Latest UFO Update', videoId: 'j_f7EsS9_XU' }
 ];
 
-function LiveMediaFooter({ onVideoSelect, videoData }) {
+const VIDEO_DATA = [
+  { id: 1, title: 'Pentagon UAP Report', videoId: 'PfSXkfV_mhA' },
+  { id: 2, title: 'Navy Pilots UFO Encounter', videoId: 'ZBtMbBPzqHY' },
+  { id: 3, title: 'Phoenix Lights Story', videoId: '2TumprpOwHY' },
+  { id: 4, title: 'What We Know About UAPs', videoId: 'SpeSpA3e56A' },
+  { id: 5, title: 'David Fravor Tic Tac Encounter', videoId: 'pWwwTSJwhmw' },
+  { id: 6, title: 'David Grusch Hearing', videoId: 'FCEnaC4UqAE' },
+  { id: 7, title: 'Avi Loeb on Interstellar Objects', videoId: 'ZrsVVGgANC8' },
+  { id: 8, title: 'SiriusAnews: Latest UFO Update', videoId: 'j_f7EsS9_XU' }
+];
+
+function LiveMediaFooter({ onVideoSelect }) {
   const scrollRef = useRef(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
@@ -212,7 +223,7 @@ function LiveMediaFooter({ onVideoSelect, videoData }) {
         className="flex gap-4 overflow-x-auto scrollbar-none cursor-grab active:cursor-grabbing pb-2"
         style={{ scrollBehavior: isDragging.current ? 'auto' : 'smooth' }}
       >
-        {videoData.map((video) => (
+        {VIDEO_DATA.map((video) => (
           <div
             key={video.id}
             onMouseUp={() => onCardMouseUp(video)}
@@ -233,7 +244,6 @@ function LiveMediaFooter({ onVideoSelect, videoData }) {
 }
 
 function App() {
-  const [videoData, setVideoData] = useState(VIDEO_DATA);
   const [sightings, setSightings] = useState(STATIC_SIGHTINGS);
   const [videosLoading, setVideosLoading] = useState(true);
   const [videosError, setVideosError] = useState(null);
@@ -1318,7 +1328,7 @@ function App() {
         </div>
       )}
 
-      <LiveMediaFooter onVideoSelect={setSelectedVideo} videoData={videoData} />
+      <LiveMediaFooter onVideoSelect={setSelectedVideo} />
 
       {/* Live News Feed Sidebar (Top Right) */}
       <div 
