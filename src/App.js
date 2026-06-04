@@ -253,7 +253,7 @@ const videoData = [
   { id: 14, title: 'Discovery: Tracking UFOs with Radar Data', videoId: 'wV3r4M1_6vU' }
 ];
 
-function LiveMediaFooter() {
+function LiveMediaFooter({ onVideoSelect }) {
   const [activeVideo, setActiveVideo] = useState(null);
   const scrollRef = useRef(null);
   const isDragging = useRef(false);
@@ -271,17 +271,22 @@ function LiveMediaFooter() {
 
   const onMouseMove = (e) => {
     if (!isDragging.current || !scrollRef.current) return;
-    e.preventDefault();
     const x = e.pageX - scrollRef.current.offsetLeft;
     const walk = (x - startX.current) * 1.5;
     scrollRef.current.scrollLeft = scrollLeft.current - walk;
     dragDistance.current = Math.abs(x - startX.current);
   };
 
-  const onMouseUp = (video) => {
+  const onMouseUpOrLeave = () => {
+    isDragging.current = false;
+  };
+
+  const onCardMouseUp = (video) => {
     isDragging.current = false;
     if (dragDistance.current < 8) {
-      onVideoSelect(video);
+      if (typeof onVideoSelect === 'function') {
+        onVideoSelect(video);
+      }
     }
   };
 
@@ -295,15 +300,16 @@ function LiveMediaFooter() {
         ref={scrollRef}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
-        onMouseLeave={() => { isDragging.current = false; }}
+        onMouseUp={onMouseUpOrLeave}
+        onMouseLeave={onMouseUpOrLeave}
         className="flex gap-4 overflow-x-auto scrollbar-none cursor-grab active:cursor-grabbing pb-2"
         style={{ scrollBehavior: isDragging.current ? 'auto' : 'smooth' }}
       >
         {videoData.map((video) => (
           <div
             key={video.id}
-            onMouseUp={() => onMouseUp(video)}
-            className="flex-shrink-0 w-64 bg-slate-900/80 border border-slate-800 rounded-lg p-2 hover:border-cyan-500/50 transition-colors"
+            onMouseUp={() => onCardMouseUp(video)}
+            className="flex-shrink-0 w-64 bg-slate-900/80 border border-slate-800 rounded-lg p-2 hover:border-cyan-500/50 transition-colors cursor-pointer"
           >
             <img
               src={`https://weserv.nl?url=https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
@@ -401,7 +407,7 @@ function App() {
   const [isRotating, setIsRotating] = useState(true);
   const [highlightedLocation, setHighlightedLocation] = useState(null);
   const [showReportForm, setShowReportForm] = useState(false);
-  const [playingVideo, setPlayingVideo] = useState(null);
+    const [selectedVideo, setSelectedVideo] = useState(null);
   const [showPayPalModal, setShowPayPalModal] = useState(false);
   const [newsItems, setNewsItems] = useState([]);
   const [readerArticle, setReaderArticle] = useState(null);
@@ -449,7 +455,7 @@ function App() {
         const videoIdx = Number(button.dataset.videoIdx);
         const video = liveFeedVideos.concat(liveFeedVideos)[videoIdx];
         if (video && (video.videoId === videoId || video.video_id === videoId)) {
-          setPlayingVideo(video);
+          setSelectedVideo(video);
         }
       }
     }
@@ -1102,7 +1108,7 @@ function App() {
                         <div 
                           key={vidIdx} 
                           className="video-card cursor-pointer hover:scale-105 transition-transform"
-                          onClick={() => setPlayingVideo(video)}
+                          onClick={() => setSelectedVideo(video)}
                         >
                           <div className="video-thumbnail-wrapper w-full h-24 rounded overflow-hidden bg-slate-900 flex items-center justify-center">
                         {!thumbnailLoadFailed[video.video_id] ? (
@@ -1406,7 +1412,7 @@ function App() {
         </div>
       )}
 
-      <LiveMediaFooter onVideoSelect={setPlayingVideo} />
+      <LiveMediaFooter onVideoSelect={setSelectedVideo} />
 
       {/* Live News Feed Sidebar (Top Right) */}
       <div 
@@ -1551,32 +1557,31 @@ function App() {
       )}
 
       {/* Unified Video Player Modal */}
-      {playingVideo && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md"
-          onClick={() => setPlayingVideo(null)}
-          data-testid="video-modal"
-        >
-          <div 
-            className="relative bg-slate-900 border border-cyan-500/40 rounded-xl p-2 w-full max-w-3xl aspect-video shadow-2xl shadow-cyan-500/10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button 
-              onClick={() => setPlayingVideo(null)}
-              className="absolute -top-10 right-0 text-white bg-slate-800 hover:bg-red-600 px-3 py-1 rounded-md text-xs transition-colors"
-              data-testid="close-video-btn"
-            >
-              Close ✕
-            </button>
-            <iframe
-              className="w-full h-full rounded-lg"
-              src={`https://www.youtube.com/embed/${playingVideo.videoId || playingVideo.video_id || playingVideo.id}?autoplay=1`}
-              title={playingVideo.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
-        </div>
+      {selectedVideo && (
+      <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md"
+      onClick={() => setSelectedVideo(null)}
+      >
+      <div
+      className="relative bg-slate-900 border border-cyan-500/40 rounded-xl p-2 w-full max-w-4xl aspect-video shadow-2xl shadow-cyan-500/10"
+      onClick={(e) => e.stopPropagation()}
+      >
+      <button
+      onClick={() => setSelectedVideo(null)}
+      className="absolute -top-10 right-0 text-white bg-slate-800 hover:bg-red-600 px-3 py-1 rounded-md text-xs transition-colors"
+      >
+      Close ✕
+      </button>
+      <iframe
+        className="w-full h-full rounded-lg"
+        src={`https://youtube.com/embed/${selectedVideo.videoId || selectedVideo.video_id}?autoplay=1`}
+        title={selectedVideo.title}
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      ></iframe>
+      </div>
+      </div>
       )}
 
       {/* Toast Notifications */}
