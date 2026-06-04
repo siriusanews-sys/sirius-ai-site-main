@@ -151,14 +151,18 @@ const NEWS_PLACEHOLDER = "https://unsplash.com";
 
 // Curated list for the video slider
 const VIDEO_DATA = [
-  { id: 1, title: 'Pentagon UAP Report', videoId: 'PfSXkfV_mhA' },
-  { id: 2, title: 'Navy Pilots UFO Encounter', videoId: 'ZBtMbBPzqHY' },
-  { id: 3, title: 'Phoenix Lights Story', videoId: '2TumprpOwHY' },
-  { id: 4, title: 'What We Know About UAPs', videoId: 'SpeSpA3e56A' },
-  { id: 5, title: 'David Fravor Tic Tac Encounter', videoId: 'aB8zcAttP1Y' },
-  { id: 6, title: 'NewsNation UAP Update', videoId: 'SgI4Tj9yKls' },
-  { id: 7, title: 'Ross Coulthart: Hidden Truth', videoId: 'rO6G6h6x6fM' },
-  { id: 8, title: 'Ariel School Encounter', videoId: 'hT-sW_yV1Yc' }
+  { id: 1, title: 'NewsNation: UFO & UAP Special Report', videoId: 'SgI4Tj9yKls' },
+  { id: 2, title: 'Joe Rogan Experience: David Fravor UFO Encounter', videoId: 'aB8zcAttP1Y' },
+  { id: 3, title: 'History Channel: Ancient Aliens Unexplained', videoId: '2TumprpOwHY' },
+  { id: 4, title: 'SpaceRip: Deep Space Mysteries Explained', videoId: 'SpeSpA3e56A' },
+  { id: 5, title: 'Bob Lazar: Area 51 & UFO Technology', videoId: 'kRO5j4A7C38' },
+  { id: 6, title: 'SiriusAnews: Latest Tech & UAP Updates', videoId: 'hT-sW_yV1Yc' },
+  { id: 7, title: 'David Icke: The Hidden Truth Matrix', videoId: 'PfSXkfV_mhA' },
+  { id: 8, title: 'NewsNation: Exclusive Whistleblower Interview', videoId: 'rO6G6h6x6fM' },
+  { id: 9, title: 'History Channel: Project Blue Book Secrets', videoId: 'ZBtMbBPzqHY' },
+  { id: 10, title: 'Joe Rogan Experience: Bob Lazar Area 51', videoId: '2aWLYe4m6O8' },
+  { id: 11, title: 'SpaceRip: Cosmic Phenomenon & Anomalies', videoId: 'm6X8A5J4QWc' },
+  { id: 12, title: 'SiriusAnews: Breakthrough UAP Evidence', videoId: 'kRO5j4A7C38' }
 ];
 
 function LiveMediaFooter({ onVideoSelect }) {
@@ -219,7 +223,7 @@ function LiveMediaFooter({ onVideoSelect }) {
             className="flex-shrink-0 w-64 bg-slate-900/80 border border-slate-800 rounded-lg p-2 hover:border-cyan-500/50 transition-colors cursor-pointer"
           >
             <img
-              src={`https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
+              src={`https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`}
               alt={video.title}
               className="w-full h-32 object-cover rounded-md pointer-events-none mb-2"
               onError={(e) => { e.target.src = "https://via.placeholder.com/320x180?text=No+Thumbnail"; }}
