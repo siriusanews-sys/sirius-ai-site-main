@@ -758,7 +758,17 @@ function App() {
       // If YouTube trigger detected, automatically fetch and display videos
       if (data.trigger_youtube) {
         try {
-          const youtubeVideos = await fetchUFOVideos(12);
+          // Use the same hidden-key serverless feed as the LiveMediaFooter
+          const feedRes = await axios.get('/api/youtube-feed', { timeout: 20000 });
+          const feedVideos = Array.isArray(feedRes.data?.videos) ? feedRes.data.videos : [];
+          // Normalize for the chat grid which expects video_id (with underscore)
+          const youtubeVideos = feedVideos.slice(0, 12).map(v => ({
+            video_id: v.videoId || v.id,
+            videoId: v.videoId || v.id,
+            title: v.title,
+            channel: v.channel || '',
+            publishedAt: v.publishedAt || null
+          }));
           // Add videos as a system message with special marker
           setChatMessages(prev => [...prev, { 
             role: 'system', 

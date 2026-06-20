@@ -27,6 +27,9 @@ User's bottom "Live Media" video bar wasn't behaving as a real live feed: it use
   - "Now Playing" highlight on active thumbnail + close button
   - Refresh button + "Updated HH:MM" timestamp
   - Graceful fallback to curated `VIDEO_DATA` if API fails
+- Chat VIDEOS_TRIGGERED grid (SIRIUS AI reply) now ALSO uses `/api/youtube-feed`
+  instead of `fetchUFOVideos` from `./services/youtubeService`, so the whole
+  app shares a single hidden-key live feed pipeline.
 
 ## Deployment notes for user
 1. Add env var `YOUTUBE_API_KEY` in Vercel → Project Settings → Environment Variables
