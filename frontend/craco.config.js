@@ -51,6 +51,15 @@ let webpackConfig = {
         ],
       };
 
+      // Remove ForkTsCheckerWebpackPlugin — this project is JS-only (no tsconfig.json).
+      // The plugin pulls a stale schema-utils@2 + ajv-keywords@3 that crashes the
+      // production build under ajv@8 ("Cannot read properties of undefined (reading 'date')").
+      if (Array.isArray(webpackConfig.plugins)) {
+        webpackConfig.plugins = webpackConfig.plugins.filter(
+          (plugin) => plugin && plugin.constructor && plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin'
+        );
+      }
+
       // Add health check plugin to webpack if enabled
       if (config.enableHealthCheck && healthPluginInstance) {
         webpackConfig.plugins.push(healthPluginInstance);
