@@ -167,38 +167,41 @@ const VIDEO_DATA = [
 
 function LiveMediaFooter({ onVideoSelect }) {
   const scrollRef = useRef(null);
-  const isDragging = useRef(false);
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
-  const dragDistance = useRef(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartX, setDragStartX] = useState(0);
+  const [scrollStartLeft, setScrollStartLeft] = useState(0);
 
-  const onMouseDown = (e) => {
+  const handleMouseDown = (e) => {
     if (!scrollRef.current) return;
-    isDragging.current = true;
-    startX.current = e.pageX - scrollRef.current.offsetLeft;
-    scrollLeft.current = scrollRef.current.scrollLeft;
-    dragDistance.current = 0;
+    setIsDragging(true);
+    setDragStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollStartLeft(scrollRef.current.scrollLeft);
   };
 
-  const onMouseMove = (e) => {
-    if (!isDragging.current || !scrollRef.current) return;
+  const handleMouseMove = (e) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
     const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX.current) * 1.5;
-    scrollRef.current.scrollLeft = scrollLeft.current - walk;
-    dragDistance.current = Math.abs(x - startX.current);
+    const walk = (x - dragStartX) * 2;
+    scrollRef.current.scrollLeft = scrollStartLeft - walk;
   };
 
-  const onMouseUpOrLeave = () => {
-    isDragging.current = false;
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
-  const onCardMouseUp = (video) => {
-    isDragging.current = false;
-    if (dragDistance.current < 8) {
-      if (typeof onVideoSelect === 'function') {
-        onVideoSelect(video);
-      }
+  const handleVideoClick = (video, e) => {
+    if (!isDragging && typeof onVideoSelect === 'function') {
+      onVideoSelect(video);
     }
+  };
+
+  const getThumbnailUrl = (videoId) => {
+    return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+  };
+
+  const handleImageError = (e, videoId) => {
+    e.target.src = `https://img.youtube.com/vi/${videoId}/default.jpg`;
   };
 
   return (
@@ -209,26 +212,32 @@ function LiveMediaFooter({ onVideoSelect }) {
 
       <div
         ref={scrollRef}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUpOrLeave}
-        onMouseLeave={onMouseUpOrLeave}
-        className="flex gap-4 overflow-x-auto scrollbar-none cursor-grab active:cursor-grabbing pb-2"
-        style={{ scrollBehavior: isDragging.current ? 'auto' : 'smooth' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        className={`flex gap-4 overflow-x-auto scrollbar-none pb-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        style={{ scrollBehavior: isDragging ? 'auto' : 'smooth' }}
       >
         {VIDEO_DATA.map((video) => (
           <div
             key={video.id}
-            onMouseUp={() => onCardMouseUp(video)}
-            className="flex-shrink-0 w-64 bg-slate-900/80 border border-slate-800 rounded-lg p-2 hover:border-cyan-500/50 transition-colors cursor-pointer"
+            onClick={(e) => handleVideoClick(video, e)}
+            className="flex-shrink-0 w-64 bg-slate-900/80 border border-slate-800 rounded-lg p-2 hover:border-cyan-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group"
           >
-            <img
-              src={`https://weserv.nl?url=https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`}
-              alt={video.title}
-              className="w-full h-32 object-cover rounded-md pointer-events-none mb-2"
-              onError={(e) => { e.target.src = `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`; }}
-            />
-            <p className="text-white text-xs font-medium truncate pointer-events-none">{video.title}</p>
+            <div className="relative w-full h-32 rounded-md overflow-hidden bg-slate-800 mb-2">
+              <img
+                src={getThumbnailUrl(video.videoId)}
+                alt={video.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={(e) => handleImageError(e, video.videoId)}
+                draggable={false}
+              />
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                <Play size={40} className="text-white fill-white" />
+              </div>
+            </div>
+            <p className="text-white text-xs font-medium truncate">{video.title}</p>
           </div>
         ))}
       </div>
