@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@hookform/resolvers": "5.0.1",
-    "ajv": "^8.17.1",
     "@radix-ui/react-accordion": "1.2.8",
     "@radix-ui/react-alert-dialog": "1.1.11",
     "@radix-ui/react-aspect-ratio": "1.1.4",
@@ -33,6 +32,7 @@
     "@radix-ui/react-toggle-group": "1.1.7",
     "@radix-ui/react-tooltip": "1.2.4",
     "@tanstack/react-query": "5.56.2",
+    "ajv": "^8.17.1",
     "axios": "1.16.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
@@ -49,8 +49,10 @@
     "react": "19.0.0",
     "react-day-picker": "^8.10.1",
     "react-dom": "19.0.0",
+    "react-globe.gl": "^2.38.0",
     "react-hook-form": "7.56.2",
     "react-resizable-panels": "3.0.1",
+    "react-rnd": "^10.5.3",
     "react-router-dom": "7.15.0",
     "react-scripts": "5.0.1",
     "recharts": "3.6.0",
@@ -87,7 +89,7 @@
     "@types/lodash": "4.17.24",
     "autoprefixer": "10.4.20",
     "dotenv": "16.4.5",
-    "eslint": "9.23.0",
+    "eslint": "8.57.1",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react": "7.37.4",
@@ -98,6 +100,8 @@
   },
   "resolutions": {
     "ajv": "^8.17.1",
+    "@eslint/eslintrc/ajv": "^6.12.6",
+    "eslint": "8.57.1",
     "fork-ts-checker-webpack-plugin": "^9.0.2",
     "react-router": "7.15.0",
     "node-forge": "1.4.0",
@@ -143,7 +147,11 @@
   },
   "overrides": {
     "ajv": "^8.17.1",
-    "fork-ts-checker-webpack-plugin": "^9.0.2"
+    "eslint": "8.57.1",
+    "fork-ts-checker-webpack-plugin": "^9.0.2",
+    "@eslint/eslintrc": {
+      "ajv": "^6.12.6"
+    }
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

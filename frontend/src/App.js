@@ -165,6 +165,67 @@ const VIDEO_DATA = [
   { id: 12, title: 'SiriusAnews: Breakthrough UAP Evidence', videoId: 'kRO5j4A7C38' }
 ];
 
+// Alias used by the legacy fetchVideos fallback path
+const STATIC_VIDEOS = VIDEO_DATA;
+
+// Fallback Near-Earth Objects shown when the NASA JPL CAD API is unreachable
+const FALLBACK_NEOS = [
+  {
+    id: "2024 ON",
+    name: "2024 ON",
+    diameter_min: 180,
+    diameter_max: 340,
+    velocity: 8.7,
+    distance_km: 1_017_000,
+    distance_lunar: 2.6,
+    approach_date: "2024-Sep-17",
+    hazardous: true,
+    nasa_url: "https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=2024%20ON"
+  },
+  {
+    id: "2023 DZ2",
+    name: "2023 DZ2",
+    diameter_min: 40,
+    diameter_max: 90,
+    velocity: 7.8,
+    distance_km: 175_000,
+    distance_lunar: 0.45,
+    approach_date: "2023-Mar-25",
+    hazardous: false,
+    nasa_url: "https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=2023%20DZ2"
+  },
+  {
+    id: "99942 Apophis",
+    name: "99942 Apophis",
+    diameter_min: 340,
+    diameter_max: 370,
+    velocity: 7.4,
+    distance_km: 31_000,
+    distance_lunar: 0.08,
+    approach_date: "2029-Apr-13",
+    hazardous: true,
+    nasa_url: "https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=Apophis"
+  }
+];
+
+/**
+ * Returns a persistent anonymous session id for chat continuity.
+ * Stored in localStorage so it survives page reloads.
+ */
+function getSessionId() {
+  try {
+    const KEY = "sirius_session_id";
+    let id = localStorage.getItem(KEY);
+    if (!id) {
+      id = "sess_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem(KEY, id);
+    }
+    return id;
+  } catch (e) {
+    return "sess_anonymous";
+  }
+}
+
 /**
  * LiveMediaFooter
  * - Fetches latest UAP/UFO YouTube videos from /api/youtube-feed (serverless)
@@ -399,6 +460,8 @@ function LiveMediaFooter() {
 
 function App() {
   const [sightings, setSightings] = useState(STATIC_SIGHTINGS);
+  const [satellites, setSatellites] = useState(STATIC_SATELLITES);
+  const [videos, setVideos] = useState(VIDEO_DATA);
   const [videosLoading, setVideosLoading] = useState(true);
   const [videosError, setVideosError] = useState(null);
   
