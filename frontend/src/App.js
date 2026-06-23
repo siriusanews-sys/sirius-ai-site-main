@@ -234,7 +234,7 @@ function getSessionId() {
  * - Click on a thumbnail plays the video INLINE inside the footer (no modal)
  * - Falls back to curated VIDEO_DATA if the API/network fails
  */
-const LIVE_FEED_CACHE_KEY = 'sirius_live_feed_cache_v1';
+const LIVE_FEED_CACHE_KEY = 'sirius_live_feed_cache_v2';
 const LIVE_FEED_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 function LiveMediaFooter() {

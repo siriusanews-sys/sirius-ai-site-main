@@ -20,14 +20,9 @@
  */
 
 const SEARCH_QUERIES = [
-  'UAP latest news',
-  'UFO disclosure 2026',
-  'UAP mysteries',
-  'UFO sighting recent',
-  'Pentagon UAP report',
-  'UAP whistleblower',
-  'UFO encounter pilots',
-  'alien disclosure congress'
+  'UAP',
+  'UAP disclosure',
+  'UAP Pentagon'
 ];
 
 // Keep only videos that mention UAP/UFO themes (defensive filter)
