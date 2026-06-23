@@ -77,9 +77,14 @@ export default async function handler(req, res) {
     });
   }
 
+  // Support custom query via ?q=
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const qParam = url.searchParams.get('q');
+  const queries = qParam ? [qParam] : SEARCH_QUERIES;
+
   try {
     const results = await Promise.allSettled(
-      SEARCH_QUERIES.map(q => searchYouTube(q, apiKey))
+      queries.map(q => searchYouTube(q, apiKey))
     );
 
     const merged = [];

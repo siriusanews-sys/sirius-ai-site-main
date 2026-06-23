@@ -18,8 +18,9 @@ import axios from "axios";
 const FEED_ENDPOINT = "/api/youtube-feed";
 const DEFAULT_LIMIT = 12;
 
-async function fetchFeed(limit = DEFAULT_LIMIT) {
-  const res = await axios.get(FEED_ENDPOINT, { timeout: 20000 });
+async function fetchFeed(query = "", limit = DEFAULT_LIMIT) {
+  const url = query ? `${FEED_ENDPOINT}?q=${encodeURIComponent(query)}` : FEED_ENDPOINT;
+  const res = await axios.get(url, { timeout: 20000 });
   const items = Array.isArray(res.data?.videos) ? res.data.videos : [];
   return items.slice(0, limit).map((v, i) => ({
     id: v.id || v.videoId || i,
@@ -34,7 +35,7 @@ async function fetchFeed(limit = DEFAULT_LIMIT) {
 
 export async function fetchUFOVideos(limit = DEFAULT_LIMIT) {
   try {
-    return await fetchFeed(limit);
+    return await fetchFeed("UAP", limit);
   } catch (e) {
     console.warn("[youtubeService] fetchUFOVideos failed:", e?.message);
     return [];
@@ -43,7 +44,7 @@ export async function fetchUFOVideos(limit = DEFAULT_LIMIT) {
 
 export async function fetchDisclosureNewsVideos(limit = DEFAULT_LIMIT) {
   try {
-    return await fetchFeed(limit);
+    return await fetchFeed("UAP disclosure", limit);
   } catch (e) {
     console.warn("[youtubeService] fetchDisclosureNewsVideos failed:", e?.message);
     return [];
