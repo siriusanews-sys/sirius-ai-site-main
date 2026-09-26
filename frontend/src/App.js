@@ -272,7 +272,8 @@ function LiveMediaFooter() {
           title: v.title,
           videoId: v.videoId || v.id,
           channel: v.channel || '',
-          publishedAt: v.publishedAt || null
+          publishedAt: v.publishedAt || null,
+          thumbnail: v.thumbnail || ''
         }));
         setVideos(normalized);
         const ts = Date.now();
@@ -430,7 +431,7 @@ function LiveMediaFooter() {
             >
               <div className="relative w-full h-28 rounded-md overflow-hidden bg-slate-800 mb-2">
                 <img
-                  src={getThumbnailUrl(video.videoId)}
+                  src={video.thumbnail || getThumbnailUrl(video.videoId)}
                   alt={video.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => handleImageError(e, video.videoId)}
